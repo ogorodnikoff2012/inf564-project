@@ -1,0 +1,1 @@
+java -cp "$PSScriptRoot/lib/java-cup-11a-runtime.jar;$PSScriptRoot/out/production/inf564-project" mini_c.Main $args
