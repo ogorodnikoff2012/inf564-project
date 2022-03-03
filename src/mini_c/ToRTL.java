@@ -112,12 +112,52 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Eunop eunop) {
-    throw new Error("Not implemented yet: Eunop");
+    if (eunop.u != Unop.Uneg) {
+      throw new Error("Not implemented yet: " + eunop.u);
+    }
+
+    Register outVal = exprValueStack.pop();
+    Register inVal = new Register();
+
+    exprValueStack.push(inVal);
+
+    this.exitPoint = this.rtlFun.body.add(new Rmbinop(Mbinop.Msub, inVal, outVal, this.exitPoint));
+    this.exitPoint = this.rtlFun.body.add(new Rconst(0,outVal,this.exitPoint));
+
+    eunop.e.accept(this);
   }
 
   @Override
   public void visit(Ebinop ebinop) {
-    throw new Error("Not implemented yet: Ebinop");
+    Register lhs = exprValueStack.pop();
+    Register rhs = new Register();
+
+    exprValueStack.push(lhs);
+    exprValueStack.push(rhs);
+
+    Mbinop opCode;
+    switch (ebinop.b) {
+      case Badd:
+        opCode = Mbinop.Madd;
+        break;
+      case Bsub:
+        opCode = Mbinop.Msub;
+        break;
+      case Bmul:
+        opCode = Mbinop.Mmul;
+        break;
+      case Bdiv:
+        opCode = Mbinop.Mdiv;
+        break;
+      default:
+        throw new Error("Not implemented yet: " + ebinop.b);
+    }
+
+    Label opLabel = rtlFun.body.add(new Rmbinop(opCode, rhs, lhs, this.exitPoint));
+    this.exitPoint = opLabel;
+
+    ebinop.e2.accept(this);
+    ebinop.e1.accept(this);
   }
 
   @Override
@@ -171,9 +211,13 @@ public class ToRTL implements Visitor {
   public void visit(Sreturn sreturn) {
     assert rtlFun != null;
 
+    assert exprValueStack.isEmpty();
+
     exprValueStack.push(rtlFun.result);
     this.exitPoint = rtlFun.exit;
     sreturn.e.accept(this);
+
+    assert exprValueStack.isEmpty();
   }
 
   @Override

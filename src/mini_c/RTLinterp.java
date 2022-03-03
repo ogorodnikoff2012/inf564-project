@@ -20,7 +20,10 @@ public class RTLinterp implements RTLVisitor {
     for (RTLfun f: file.funs)
       this.funs.put(f.name, f);
     this.mem = new Memory();
-    call("main", new LinkedList<Register>());
+  }
+
+  public long interpret() {
+    return call("main", new LinkedList<>());
   }
 
   private long call(String name, List<Register> rl) {

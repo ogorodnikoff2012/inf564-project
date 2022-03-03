@@ -44,7 +44,10 @@ public class Main {
     if (type_only) System.exit(0);
     RTLfile rtl = (new ToRTL()).translate(tf);
     if (debug) rtl.print();
-    if (interp_rtl) { new RTLinterp(rtl); System.exit(0); }
+    if (interp_rtl) {
+      RTLinterp interpreter = new RTLinterp(rtl);
+      System.exit((int) interpreter.interpret());
+    }
   }
 
 }
