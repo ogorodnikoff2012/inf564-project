@@ -3,7 +3,10 @@ package mini_c;
 import java.util.LinkedList;
 
 enum Binop {
-	Beq, Bneq, Blt, Ble, Bgt, Bge, Badd, Bsub, Bmul, Bdiv, Band, Bor
+	Beq, Bneq,
+	Blt, Ble, Bgt, Bge,
+	Badd, Bsub, Bmul, Bdiv,
+	Band, Bor
 }
 
 enum Unop {
@@ -105,6 +108,8 @@ class Pdeclvar {
 
 abstract class Ptype {
 	static Ptype ptint = new PTint();
+	static Ptype ptvoidstar = new PTvoidstar();
+	static Ptype ptypenull = new PTypenull();
 	abstract void accept(Pvisitor v);
 }
 
@@ -123,6 +128,18 @@ class PTstruct extends Ptype {
 		this.id = id.id;
 		this.loc = id.loc;
 	}
+	void accept(Pvisitor v) {
+		v.visit(this);
+	}
+}
+
+class PTvoidstar extends Ptype {
+	void accept(Pvisitor v) {
+		v.visit(this);
+	}
+}
+
+class PTypenull extends Ptype {
 	void accept(Pvisitor v) {
 		v.visit(this);
 	}
@@ -342,6 +359,10 @@ interface Pvisitor {
 	public void visit(PTint n);
 	
 	public void visit(PTstruct n);
+
+	public void visit(PTvoidstar n);
+
+	public void visit(PTypenull n);
 	
 	public void visit(Pint n);
 

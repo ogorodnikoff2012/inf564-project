@@ -8,7 +8,13 @@ abstract class Typ {
 }
 
 class Tint extends Typ {
-	Tint() {}
+	public static final Tint tint = new Tint();
+	private Tint() {}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Tint || obj instanceof Ttypenull;
+	}
 
 	void accept(Visitor v) {
 		v.visit(this);
@@ -26,6 +32,17 @@ class Tstructp extends Typ {
 		this.s = s;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Ttypenull) {
+			return true;
+		}
+		if (!(obj instanceof Tstructp)) {
+			return false;
+		}
+		return s.equals(((Tstructp)obj).s);
+	}
+
 	void accept(Visitor v) {
 		v.visit(this);
 	}
@@ -36,7 +53,13 @@ class Tstructp extends Typ {
 }
 
 class Tvoidstar extends Typ {
-	Tvoidstar() {
+	public static final Tvoidstar tvoidstar = new Tvoidstar();
+	private Tvoidstar() {
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Tvoidstar || obj instanceof Ttypenull;
 	}
 
 	void accept(Visitor v) {
@@ -49,7 +72,13 @@ class Tvoidstar extends Typ {
 }
 
 class Ttypenull extends Typ {
-	Ttypenull() {
+	public static final Ttypenull ttypenull = new Ttypenull();
+	private Ttypenull() {
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Typ;
 	}
 
 	void accept(Visitor v) {
@@ -88,6 +117,14 @@ class Field {
 
 	void accept(Visitor v) {
 		v.visit(this);
+	}
+
+	@Override
+	public String toString() {
+		return "Field{" +
+				"field_name='" + field_name + '\'' +
+				", field_typ=" + field_typ +
+				'}';
 	}
 }
 

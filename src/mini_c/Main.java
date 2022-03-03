@@ -39,13 +39,14 @@ public class Main {
             typer.visit(f);
             File tf = typer.getFile();
             if (type_only) System.exit(0);
-        } catch (Error e) {
+            TtreePrinterVisitor printer = new TtreePrinterVisitor();
+            tf.accept(printer);
+            System.out.println(printer);
+        } catch (Error | Exception e) {
         	System.out.println("error: " + e.getMessage());
+        	e.printStackTrace();
         	System.exit(1);
-        } catch (Exception e) {
-        	System.out.println("error: " + e.getMessage());
-        	System.exit(1);
-		}
+        }
 	}
 	
 	static void cat(InputStream st) throws IOException {
