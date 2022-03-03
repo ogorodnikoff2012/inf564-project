@@ -5,5 +5,8 @@
 // et le lance sur ce fichier
 
 int main() {
-  return 40 - (-2);
+  int y, x;
+  y = 40;
+  x = 2;
+  return y + x;
 }

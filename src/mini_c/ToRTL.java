@@ -92,7 +92,10 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Eaccess_local eaccess_local) {
-    throw new Error("Not implemented yet: Eaccess_local");
+    Register out = exprValueStack.pop();
+    Register in = scopeStack.resolve(eaccess_local.i);
+
+    this.exitPoint = this.rtlFun.body.add(new Rmbinop(Mbinop.Mmov, in, out, this.exitPoint));
   }
 
   @Override
@@ -102,7 +105,14 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Eassign_local eassign_local) {
-    throw new Error("Not implemented yet: Eassign_local");
+    Register out = this.exprValueStack.pop();
+    Register var = scopeStack.resolve(eassign_local.i);
+
+    this.exprValueStack.push(var);
+
+    this.exitPoint = this.rtlFun.body.add(new Rmbinop(Mbinop.Mmov, var, out, this.exitPoint));
+
+    eassign_local.e.accept(this);
   }
 
   @Override
@@ -177,7 +187,8 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Sexpr sexpr) {
-    throw new Error("Not implemented yet: Sexpr");
+    exprValueStack.push(new Register());
+    sexpr.e.accept(this);
   }
 
   @Override
