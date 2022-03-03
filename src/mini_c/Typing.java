@@ -268,7 +268,7 @@ public class Typing implements Pvisitor {
     collect_decl_var(n.vl, decl_var);
     collect_stmt(n.sl, stmts);
 
-    lastBlock = blockStack.pop();
+    this.stmt = this.lastBlock = blockStack.pop();
   }
 
   @Override

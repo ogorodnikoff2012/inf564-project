@@ -5,8 +5,9 @@
 // et le lance sur ce fichier
 
 int main() {
-  int y, x;
-  y = 40;
-  x = 2;
-  return y + x;
+  if (1) {
+    return 2;
+  } else {
+    return 3;
+  }
 }

@@ -182,7 +182,7 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Sskip sskip) {
-    throw new Error("Not implemented yet: Sskip");
+    // Do nothing, YAY !!!
   }
 
   @Override
@@ -193,7 +193,21 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Sif sif) {
-    throw new Error("Not implemented yet: Sif");
+    Label exitPoint = this.exitPoint;
+
+    sif.s2.accept(this);
+    Label elseEntry = this.exitPoint;
+    this.exitPoint = exitPoint;
+
+    sif.s1.accept(this);
+    Label thenEntry = this.exitPoint;
+
+    Register val = new Register();
+    exprValueStack.push(val);
+
+    this.exitPoint = this.rtlFun.body.add(new Rmubranch(new Mjz(), val, elseEntry, thenEntry));
+
+    sif.e.accept(this);
   }
 
   @Override
