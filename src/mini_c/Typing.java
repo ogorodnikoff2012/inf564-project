@@ -9,6 +9,19 @@ public class Typing implements Pvisitor {
 	private Sblock block = null;
 	private Stmt stmt = null;
 	private Expr expr = null;
+	private Sif sif = null;
+	private Sskip skip = null;
+	private Ebinop binop = null;
+	private Eunop unop = null;
+	private Esizeof sizeof = null;
+	private Ecall ecall = null;
+    private Swhile swhile = null;
+    private Eaccess_field access_field = null;
+    private Eaccess_local access_local = null;
+    private Eassign_local assign_local = null;
+    private Eassign_field assign_field = null;
+    private Tstructp tstructp = null;
+    private Structure structure = null;
 
 	// le résultat du typage sera mis dans cette variable
 	private File file;
@@ -42,8 +55,7 @@ public class Typing implements Pvisitor {
 
 	@Override
 	public void visit(PTstruct n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
+		this.tstructp = new Tstructp(new Structure(n.id));
 	}
 
 	@Override
@@ -53,57 +65,88 @@ public class Typing implements Pvisitor {
 
 	@Override
 	public void visit(Pident n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
-
+        this.access_local = new Eaccess_local(n.id);
 	}
 
 	@Override
 	public void visit(Punop n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
+        Expr old_expr = this.expr;
+        n.e1.accept(this);
+        Expr e = this.expr;
+        this.expr = old_expr;
 
+        this.unop = new Eunop(n.op, e);
 	}
 
 	@Override
 	public void visit(Passign n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
-	}
+		Expr old_expr = this.expr;
+		n.e2.accept(this);
+		Expr e2 = this.expr;
+		this.expr = old_expr;
+
+        if(n.e1 instanceof Pident) {
+            this.assign_local = new Eassign_local(n.e1.id, e2);
+        } else {
+            n.e1.e.accept(this);
+            Expr e1 = this.expr;
+            this.expr = old_expr;
+            Field f = new Field(n.e1.f, this.typ);
+            this.assign_field = new Eassign_field(e1, f, e2);
+        }
+    }
 
 	@Override
 	public void visit(Pbinop n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
+        Expr old_expr = this.expr;
+        n.e1.accept(this);
+        Expr e1 = this.expr;
+        this.expr = old_expr;
 
+        n.e2.accept(this);
+        Expr e2 = this.expr;
+        this.expr = old_expr;
+
+        this.binop = new Ebinop(n.op, e1, e2);
 	}
 
 	@Override
 	public void visit(Parrow n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
+        Expr old_expr = this.expr;
+        n.e.accept(this);
+        Expr e = this.expr;
+        this.expr = old_expr;
 
+        this.access_field = new Eaccess_field(e, new Field(n.f, this.typ));
 	}
+
+    private LinkedList<Expr> collect_expr(LinkedList<Pexpr> pexpr_list) {
+        LinkedList<Expr> expr_list = new LinkedList<>();
+
+        for(Pexpr pexpr : pexpr_list) {
+            Expr old_expr = this.expr;
+            pexpr.accept(this);
+            expr_list.add(this.expr);
+            this.expr = old_expr;
+        }
+
+        return expr_list;
+    }
 
 	@Override
 	public void visit(Pcall n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
-
+        LinkedList<Expr> expr_list = collect_expr(n.l);
+        this.ecall = new Ecall(n.f, expr_list);
 	}
 
 	@Override
 	public void visit(Psizeof n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
-
+        this.sizeof = new Esizeof(new Structure(n.id));
 	}
 
 	@Override
 	public void visit(Pskip n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
-
+        this.skip = new Sskip();
 	}
 
 	@Override
@@ -113,16 +156,36 @@ public class Typing implements Pvisitor {
 
 	@Override
 	public void visit(Pif n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
+        Expr old_expr = this.expr;
+        n.e.accept(this);
+        Expr expr = this.expr;
+        this.expr = old_expr;
 
+        Expr old_stmt = this.stmt;
+        n.s1.accept(this);
+        Stmt stmt1 = this.stmt;
+        this.stmt = old_stmt;
+
+        n.s2.accept(this);
+        Stmt stmt2 = this.stmt;
+        this.stmt = old_stmt;
+
+        this.sif = new Sif(expr, stmt1, stmt2);
 	}
 
 	@Override
 	public void visit(Pwhile n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
+        Expr old_expr = this.expr;
+        n.e.accept(this);
+        Expr e = this.expr;
+        this.expr = old_expr;
 
+        Stmt old_stmt = this.stmt;
+        n.s1.accept(this);
+        Stmt s = this.stmt;
+        this.stmt = old_stmt;
+
+        this.swhile = new Swhile(e, s);
 	}
 
 	private LinkedList<Stmt> collect_stmt(LinkedList<Pstmt> pstmt_list) {
@@ -156,9 +219,11 @@ public class Typing implements Pvisitor {
 
 	@Override
 	public void visit(Pstruct n) {
-		// TODO Auto-generated method stub
-		throw new Error(n.getClass().getName() + ": Not implemented");
-
+        LinkedList<Decl_var> decl_var_list = collect_decl_var(n.fl);
+        this.structure = new Structure(n.s);
+        for(Decl_var decl_var : decl_var_list) {
+            this.structure.fields.put(decl_var.name, new Field(decl_var.name, decl_var.t));
+        }
 	}
 
 	private LinkedList<Decl_var> collect_decl_var(LinkedList<Pdeclvar> pdeclvar_list) {
@@ -176,7 +241,7 @@ public class Typing implements Pvisitor {
 
 	@Override
 	public void visit(Pfun n) {
-		Typ old_typ = this.typ;
+        Typ old_typ = this.typ;
 	  n.ty.accept(this);
 	  Typ typ = this.typ;
 	  this.typ = old_typ;
