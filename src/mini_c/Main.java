@@ -8,6 +8,7 @@ public class Main {
   static boolean parse_only = false;
   static boolean type_only = false;
   static boolean interp_rtl = false;
+  static boolean interp_ertl = false;
   static boolean debug = false;
   static String file = null;
 
@@ -24,6 +25,8 @@ public class Main {
         type_only = true;
       else if (arg.equals("--interp-rtl"))
         interp_rtl = true;
+      else if (arg.equals("--interp-ertl"))
+        interp_ertl = true;
       else if (arg.equals("--debug"))
         debug = true;
       else {
@@ -44,10 +47,20 @@ public class Main {
     if (type_only) System.exit(0);
     RTLfile rtl = (new ToRTL()).translate(tf);
     if (debug) rtl.print();
-    if (interp_rtl) {
-      RTLinterp interpreter = new RTLinterp(rtl);
-      System.exit((int) interpreter.interpret());
+    if (interp_rtl) { System.exit((int) new RTLinterp(rtl).interpret()); }
+    ERTLfile ertl = (new ToERTL()).translate(rtl);
+    if (debug) ertl.print();
+    if (interp_ertl) { System.exit((int) new ERTLinterp(ertl).interpret()); }
+    if (debug) {
+      printLiveness(ertl);
     }
   }
 
+  private static void printLiveness(ERTLfile ertlFile) {
+    for (ERTLfun fun : ertlFile.funs) {
+      System.out.println("== Liveness =====================");
+      System.out.println(fun.name);
+      new Liveness(fun.body).print(fun.entry);
+    }
+  }
 }

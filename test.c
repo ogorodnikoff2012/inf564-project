@@ -11,10 +11,6 @@ int fact(int n) {
   return n * fact(n - 1);
 }
 
-int diff(int x, int y) {
-  return x - y;
-}
-
 int main() {
-  return diff(5, 2);
+  return fact(5);
 }
