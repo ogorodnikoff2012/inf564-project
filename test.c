@@ -4,10 +4,17 @@
 // la commande 'make' recompile mini-c (si nécessaire)
 // et le lance sur ce fichier
 
-int main() {
-  if (1) {
-    return 2;
-  } else {
-    return 3;
+int fact(int n) {
+  if (n <= 1) {
+    return 1;
   }
+  return n * fact(n - 1);
+}
+
+int diff(int x, int y) {
+  return x - y;
+}
+
+int main() {
+  return diff(5, 2);
 }

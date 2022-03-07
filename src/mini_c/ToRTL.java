@@ -122,17 +122,23 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Eunop eunop) {
-    if (eunop.u != Unop.Uneg) {
+    Register outVal = exprValueStack.pop();
+
+    if (eunop.u == Unop.Uneg) {
+      Register inVal = new Register();
+
+      exprValueStack.push(inVal);
+
+      this.exitPoint = this.rtlFun.body
+          .add(new Rmbinop(Mbinop.Msub, inVal, outVal, this.exitPoint));
+      this.exitPoint = this.rtlFun.body.add(new Rconst(0, outVal, this.exitPoint));
+    } else if (eunop.u == Unop.Unot) {
+      exprValueStack.push(outVal);
+
+      this.exitPoint = this.rtlFun.body.add(new Rmunop(new Msetei(0), outVal, this.exitPoint));
+    } else {
       throw new Error("Not implemented yet: " + eunop.u);
     }
-
-    Register outVal = exprValueStack.pop();
-    Register inVal = new Register();
-
-    exprValueStack.push(inVal);
-
-    this.exitPoint = this.rtlFun.body.add(new Rmbinop(Mbinop.Msub, inVal, outVal, this.exitPoint));
-    this.exitPoint = this.rtlFun.body.add(new Rconst(0,outVal,this.exitPoint));
 
     eunop.e.accept(this);
   }
@@ -145,8 +151,45 @@ public class ToRTL implements Visitor {
     exprValueStack.push(lhs);
     exprValueStack.push(rhs);
 
+    if (ebinop.b == Binop.Band || ebinop.b == Binop.Bor) {
+      Label exitPoint = this.exitPoint;
+
+      Label castBool = this.rtlFun.body.add(new Rmunop(new Msetnei(0), lhs,exitPoint));
+      Label returnRhs = this.rtlFun.body.add(new Rmbinop(Mbinop.Mmov, rhs, lhs, castBool));
+      this.exitPoint = returnRhs;
+      ebinop.e2.accept(this);
+      Label evalRhs = this.exitPoint;
+
+      Label returnLhs = castBool;
+      Mubranch branchOp = (ebinop.b == Binop.Band ? new Mjz() : new Mjnz());
+      Label shortCircuit = this.rtlFun.body.add(new Rmubranch(branchOp, lhs, returnLhs, evalRhs));
+
+      this.exitPoint = shortCircuit;
+      ebinop.e1.accept(this);
+
+      return;
+    }
+
     Mbinop opCode;
     switch (ebinop.b) {
+      case Beq:
+        opCode = Mbinop.Msete;
+        break;
+      case Bneq:
+        opCode = Mbinop.Msetne;
+        break;
+      case Blt:
+        opCode = Mbinop.Msetl;
+        break;
+      case Ble:
+        opCode = Mbinop.Msetle;
+        break;
+      case Bgt:
+        opCode = Mbinop.Msetg;
+        break;
+      case Bge:
+        opCode = Mbinop.Msetge;
+        break;
       case Badd:
         opCode = Mbinop.Madd;
         break;
@@ -172,7 +215,16 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Ecall ecall) {
-    throw new Error("Not implemented yet: Ecall");
+    Register result = exprValueStack.pop();
+    LinkedList<Register> arguments = new LinkedList<>();
+    this.exitPoint = this.rtlFun.body.add(new Rcall(result, ecall.i, arguments, this.exitPoint));
+
+    for (Expr expr : ecall.el) {
+      Register arg = new Register();
+      arguments.add(arg);
+      exprValueStack.push(arg);
+      expr.accept(this);
+    }
   }
 
   @Override
@@ -212,7 +264,20 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Swhile swhile) {
-    throw new Error("Not implemented yet: Swhile");
+    Label exitPoint = this.exitPoint;
+
+    Label gotoHead = this.rtlFun.body.add(null); // To be filled later
+    this.exitPoint = gotoHead;
+    swhile.s.accept(this);
+    Label bodyBegin = this.exitPoint;
+
+    Register val = new Register();
+    exprValueStack.push(val);
+
+    this.exitPoint = this.rtlFun.body.add(new Rmubranch(new Mjz(), val, exitPoint, bodyBegin));
+    swhile.e.accept(this);
+
+    this.rtlFun.body.replace(gotoHead, new Rgoto(this.exitPoint));
   }
 
   @Override

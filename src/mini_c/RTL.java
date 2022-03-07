@@ -216,6 +216,10 @@ class RTLgraph {
 		return l;
 	}
 
+	void replace(Label label, RTL newInstr) {
+	  graph.put(label, newInstr);
+  }
+
 	// imprime le graphe par un parcours en profondeur
 	private void print(Set<Label> visited, Label l) {
 		if (visited.contains(l)) return;
