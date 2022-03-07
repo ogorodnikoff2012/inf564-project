@@ -100,7 +100,13 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Eaccess_field eaccess_field) {
-    throw new Error("Not implemented yet: Eaccess_field");
+    Register out = exprValueStack.pop();
+    Register in = new Register();
+
+    this.exitPoint = this.rtlFun.body.add(new Rload(in, eaccess_field.f.getOffset(), out, this.exitPoint));
+
+    exprValueStack.push(in);
+    eaccess_field.e.accept(this);
   }
 
   @Override
@@ -117,7 +123,18 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Eassign_field eassign_field) {
-    throw new Error("Not implemented yet: Eassign_field");
+    Register out = exprValueStack.pop();
+
+    Register lhs = new Register();
+    Register rhs = out;
+
+    this.exitPoint = this.rtlFun.body.add(new Rstore(rhs, lhs, eassign_field.f.getOffset(), this.exitPoint));
+
+    exprValueStack.push(lhs);
+    eassign_field.e1.accept(this);
+
+    exprValueStack.push(rhs);
+    eassign_field.e2.accept(this);
   }
 
   @Override
@@ -229,7 +246,8 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Esizeof esizeof) {
-    throw new Error("Not implemented yet: Esizeof");
+    Register reg = exprValueStack.pop();
+    this.exitPoint = this.rtlFun.body.add(new Rconst(esizeof.s.getSize(), reg, this.exitPoint));
   }
 
   @Override

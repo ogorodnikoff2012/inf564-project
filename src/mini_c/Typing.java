@@ -292,7 +292,7 @@ public class Typing implements Pvisitor {
     collect_decl_var(n.fl, decl_var_list);
 
     for (Decl_var decl_var : decl_var_list) {
-      structure.fields.put(decl_var.name, new Field(decl_var.name, decl_var.t));
+      structure.addField(new Field(decl_var.name, decl_var.t));
     }
   }
 
@@ -365,11 +365,12 @@ public class Typing implements Pvisitor {
     Tstructp structType = (Tstructp) type;
     assert structType.s != null;
 
-    if (!structType.s.fields.containsKey(fieldName)) {
+    Field field = structType.s.getField(fieldName);
+    if (field == null) {
       throw new Error("Struct " + structType.s.str_name + " does not have field " + fieldName);
     }
 
-    return structType.s.fields.get(fieldName);
+    return field;
   }
 
   private Decl_fun findFunction(String functionName) {

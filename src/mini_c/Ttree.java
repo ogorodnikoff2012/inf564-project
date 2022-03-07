@@ -5,6 +5,8 @@ import java.util.LinkedList;
 
 abstract class Typ {
 	abstract void accept(Visitor v);
+
+	public abstract int getSize();
 }
 
 class Tint extends Typ {
@@ -19,6 +21,12 @@ class Tint extends Typ {
 	void accept(Visitor v) {
 		v.visit(this);
 	}
+
+	@Override
+	public int getSize() {
+		return 8;
+	}
+
 	@Override
 	public String toString() {
 	  return "int";
@@ -46,6 +54,12 @@ class Tstructp extends Typ {
 	void accept(Visitor v) {
 		v.visit(this);
 	}
+
+	@Override
+	public int getSize() {
+		return 8;
+	}
+
 	@Override
 	public String toString() {
 	  return "struct " + s.str_name + "*";
@@ -65,6 +79,12 @@ class Tvoidstar extends Typ {
 	void accept(Visitor v) {
 		v.visit(this);
 	}
+
+	@Override
+	public int getSize() {
+		return 8;
+	}
+
 	@Override
 	public String toString() {
 	  return "void*";
@@ -84,6 +104,12 @@ class Ttypenull extends Typ {
 	void accept(Visitor v) {
 		v.visit(this);
 	}
+
+	@Override
+	public int getSize() {
+		return 8;
+	}
+
 	@Override
 	public String toString() {
 	  return "typenull";
@@ -91,13 +117,32 @@ class Ttypenull extends Typ {
 }
 
 class Structure {
-	public String str_name;
-	public HashMap<String, Field> fields;
-	// on pourra ajouter plus tard ici la taille totale de la structure
+	public final String str_name;
+	private final HashMap<String, Field> fields;
+	private int size;
 
 	Structure(String str_name) {
 		this.str_name = str_name;
 		this.fields = new HashMap<String, Field>();
+		this.size = 0;
+	}
+
+	void addField(Field f) {
+		String name = f.field_name;
+		if (fields.containsKey(name)) {
+			throw new Error("Redefinition of field " + name + " in structure " + this.str_name);
+		}
+		f.setOffset(size);
+		size += f.getSize();
+		fields.put(name, f);
+	}
+
+	int getSize() {
+		return size;
+	}
+
+	Field getField(String name) {
+		return fields.get(name);
 	}
 
 	void accept(Visitor v) {
@@ -106,13 +151,26 @@ class Structure {
 }
 
 class Field {
-	public String field_name;
-	public Typ field_typ;
-	// on pourra ajouter plus tard ici la position du champ dans la structure
+	public final String field_name;
+	public final Typ field_typ;
+	private int offset;
 
 	Field(String field_name, Typ field_typ) {
 		this.field_name = field_name;
 		this.field_typ = field_typ;
+		this.offset = 0;
+	}
+
+	void setOffset(int offset) {
+		this.offset = offset;
+	}
+
+	int getOffset() {
+		return offset;
+	}
+
+	int getSize() {
+		return field_typ.getSize();
 	}
 
 	void accept(Visitor v) {

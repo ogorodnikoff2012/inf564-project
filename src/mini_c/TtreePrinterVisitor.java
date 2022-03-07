@@ -28,7 +28,7 @@ public class TtreePrinterVisitor implements Visitor {
 
   @Override
   public void visit(Tstructp n) {
-    print(n.toString(), " # Fields: ", n.s.fields.toString());
+    print(n.toString());
   }
 
   @Override
