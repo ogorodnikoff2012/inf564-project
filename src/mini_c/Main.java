@@ -57,7 +57,7 @@ public class Main {
     if (debug) {
       printLiveness(ertl);
     }
-    LTLfile ltl = (new ToLTL()).translate(ertl);
+    LTLfile ltl = (new ToLTL(debug)).translate(ertl);
     if (debug) {
       ltl.print();
     }

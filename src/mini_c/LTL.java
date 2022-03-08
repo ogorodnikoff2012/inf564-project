@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /** une opérande = un registre ou un emplacement de pile
@@ -27,6 +28,11 @@ class Spilled extends Operand {
     if (that instanceof Reg) return false;
     return ((Spilled)that).n == this.n;
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(n);
+  }
 }
 
 /** une opérande qui est un registre (physique) */
@@ -42,6 +48,11 @@ class Reg extends Operand {
   public boolean equals(Object that) {
     if (that instanceof Spilled) return false;
     return ((Reg)that).r.equals(this.r);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(r);
   }
 }
 
