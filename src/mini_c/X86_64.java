@@ -65,6 +65,9 @@ public class X86_64 {
 	X86_64 idivq(String op) { return emit("idivq " + op); }
 	X86_64 cqto() { return emit("cqto"); }
 
+	//swap contents of registers
+	X86_64 xchg(String op1, String op2) {return  emit("xchg " + op1 + ", " + op2); }
+
 	X86_64 leaq(String op1, String op2) { return emit("leaq " + op1 + ", " + op2); }
 
 	X86_64 notq(String op) { return emit("notq " + op); }

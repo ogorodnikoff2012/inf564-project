@@ -160,11 +160,17 @@ public class Lin implements LTLVisitor {
     if (lmunop.m instanceof Maddi) {
       asm.addq(((Maddi) lmunop.m).n, lmunop.o.toString());
     } else if (lmunop.m instanceof  Msetei) {
-      asm.cmpq(((Msetei) lmunop.m).n, lmunop.o.toString());
-      asm.sete(lmunop.o.toString());
+      asm.xchg(lmunop.o.toString(), Register.rax.name);
+      asm.cmpq(((Msetei) lmunop.m).n, Register.rax.name);
+      asm.sete("%al");
+      asm.movzbq("%al", Register.rax.name);
+      asm.xchg(lmunop.o.toString(), Register.rax.name);
     } else {
-      asm.cmpq(((Msetnei) lmunop.m).n, lmunop.o.toString());
-      asm.setne(lmunop.o.toString());
+      asm.xchg(lmunop.o.toString(), Register.rax.name);
+      asm.cmpq(((Msetnei) lmunop.m).n, Register.rax.name);
+      asm.setne("%al");
+      asm.movzbq("%al", Register.rax.name);
+      asm.xchg(lmunop.o.toString(), Register.rax.name);
     }
     lin(lmunop.l);
   }
