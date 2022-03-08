@@ -62,6 +62,17 @@ public class Main {
       ltl.print();
     }
     if (interp_ltl) { System.exit((int) new LTLinterp(ltl).interpret()); }
+
+    X86_64 asm = new Lin().linearize(ltl);
+    asm.printToFile(basename(file) + ".s");
+  }
+
+  private static String basename(String filename) {
+    int dot = filename.lastIndexOf('.');
+    if (dot == -1) {
+      return filename;
+    }
+    return filename.substring(0, dot);
   }
 
   private static void printLiveness(ERTLfile ertlFile) {

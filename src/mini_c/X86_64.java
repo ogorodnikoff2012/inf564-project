@@ -57,6 +57,8 @@ public class X86_64 {
 	X86_64 incq(String op) { return emit("incq " + op); }
 	X86_64 decq(String op) { return emit("decq " + op); }
 	X86_64 negq(String op) { return emit("negq " + op); }
+
+	X86_64 addq(int n, String op) { return addq("$" + n, op); }
 	X86_64 addq(String op1, String op2) { return emit("addq " + op1 + ", " + op2); }
 	X86_64 subq(String op1, String op2) { return emit("subq " + op1 + ", " + op2); }
 	X86_64 imulq(String op1, String op2) { return emit("imulq " + op1 + ", " + op2); }
