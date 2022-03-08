@@ -31,6 +31,9 @@ public class Register {
 	}
 	@Override
 	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
 		Register that = (Register)o;
 		return this.name.equals(that.name);
 	}

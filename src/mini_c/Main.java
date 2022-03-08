@@ -9,6 +9,7 @@ public class Main {
   static boolean type_only = false;
   static boolean interp_rtl = false;
   static boolean interp_ertl = false;
+  static boolean interp_ltl = false;
   static boolean debug = false;
   static String file = null;
 
@@ -27,6 +28,8 @@ public class Main {
         interp_rtl = true;
       else if (arg.equals("--interp-ertl"))
         interp_ertl = true;
+      else if (arg.equals("--interp-ltl"))
+        interp_ltl = true;
       else if (arg.equals("--debug"))
         debug = true;
       else {
@@ -54,6 +57,11 @@ public class Main {
     if (debug) {
       printLiveness(ertl);
     }
+    LTLfile ltl = (new ToLTL()).translate(ertl);
+    if (debug) {
+      ltl.print();
+    }
+    if (interp_ltl) { System.exit((int) new LTLinterp(ltl).interpret()); }
   }
 
   private static void printLiveness(ERTLfile ertlFile) {
