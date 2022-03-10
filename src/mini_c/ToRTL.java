@@ -6,13 +6,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ToRTL implements NoexceptVisitor {
+public class ToRTL implements Visitor {
 
   private RTLfile rtlFile = null;
   private RTLfun rtlFun = null;
   private Label exitPoint = null;
 
   private ScopeStack scopeStack = new ScopeStack();
+  private LinkedList<LoopDescriptor> loopStack = new LinkedList<>();
   private LinkedList<Register> exprValueStack = new LinkedList<>();
 
   private static final HashSet<String> specialFunctions = new HashSet<>();
@@ -256,6 +257,18 @@ public class ToRTL implements NoexceptVisitor {
   }
 
   @Override
+  public void visit(Sbreak sbreak) {
+    LoopDescriptor loopDescriptor = loopStack.peek();
+    this.exitPoint = this.rtlFun.body.add(new Rgoto(loopDescriptor.exitPoint));
+  }
+
+  @Override
+  public void visit(Scontinue scontinue) {
+    LoopDescriptor loopDescriptor = loopStack.peek();
+    this.exitPoint = this.rtlFun.body.add(new Rgoto(loopDescriptor.gotoHead));
+  }
+
+  @Override
   public void visit(Sexpr sexpr) {
     exprValueStack.push(new Register());
     sexpr.e.accept(this);
@@ -286,6 +299,9 @@ public class ToRTL implements NoexceptVisitor {
 
     Label gotoHead = this.rtlFun.body.add(null); // To be filled later
     this.exitPoint = gotoHead;
+
+    this.loopStack.push(new LoopDescriptor(gotoHead, exitPoint));
+
     swhile.s.accept(this);
     Label bodyBegin = this.exitPoint;
 
@@ -296,6 +312,8 @@ public class ToRTL implements NoexceptVisitor {
     swhile.e.accept(this);
 
     this.rtlFun.body.replace(gotoHead, new Rgoto(this.exitPoint));
+
+    this.loopStack.pop();
   }
 
   @Override
@@ -391,5 +409,15 @@ class ScopeStack {
 
   public void closeScope() {
     scopes.pop();
+  }
+}
+
+class LoopDescriptor {
+  public final Label gotoHead;
+  public final Label exitPoint;
+
+  public LoopDescriptor(Label gotoHead, Label exitPoint) {
+    this.gotoHead = gotoHead;
+    this.exitPoint = exitPoint;
   }
 }

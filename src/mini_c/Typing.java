@@ -13,6 +13,7 @@ public class Typing implements Pvisitor {
   private Sblock lastBlock = null;
   private Stmt stmt = null;
   private Expr expr = null;
+  private Swhile loop = null;
 
   private final HashMap<String, Structure> declaredStructures = new HashMap<>();
 
@@ -209,6 +210,24 @@ public class Typing implements Pvisitor {
   }
 
   @Override
+  public void visit(Pbreak n) throws SyntaxError {
+    if (this.loop == null) {
+      throw new SyntaxError("break not in a loop", n.loc);
+    }
+
+    this.stmt = new Sbreak(this.loop);
+  }
+
+  @Override
+  public void visit(Pcontinue n) throws SyntaxError {
+    if (this.loop == null) {
+      throw new SyntaxError("continue not in a loop", n.loc);
+    }
+
+    this.stmt = new Scontinue(this.loop);
+  }
+
+  @Override
   public void visit(Peval n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e.accept(this);
@@ -243,10 +262,16 @@ public class Typing implements Pvisitor {
     Expr e = this.expr;
     this.expr = old_expr;
 
+    Swhile old_loop = this.loop;
+    this.loop = new Swhile(e, null);
+
+
     n.s1.accept(this);
     Stmt s = this.stmt;
 
-    this.stmt = new Swhile(e, s);
+    this.loop.s = s;
+    this.stmt = this.loop;
+    this.loop = old_loop;
   }
 
   private void collect_stmt(LinkedList<Pstmt> pstmt_list, LinkedList<Stmt> result)

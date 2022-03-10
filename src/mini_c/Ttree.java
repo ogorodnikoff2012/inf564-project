@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 abstract class Typ {
-	abstract void accept(NoexceptVisitor v);
-	abstract void accept(Visitor v) throws CompilerError;
+	abstract void accept(Visitor v);
 
 	public abstract int getSize();
 }
@@ -19,11 +18,7 @@ class Tint extends Typ {
 		return obj instanceof Tint || obj instanceof Ttypenull;
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
@@ -56,11 +51,7 @@ class Tstructp extends Typ {
 		return s.equals(((Tstructp)obj).s);
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
@@ -85,11 +76,7 @@ class Tvoidstar extends Typ {
 		return obj instanceof Tvoidstar || obj instanceof Ttypenull;
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
@@ -114,11 +101,7 @@ class Ttypenull extends Typ {
 		return obj instanceof Typ;
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
@@ -162,11 +145,7 @@ class Structure {
 		return fields.get(name);
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 }
@@ -194,11 +173,7 @@ class Field {
 		return field_typ.getSize();
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
@@ -221,11 +196,7 @@ class Decl_var {
 		this.name = i;
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
@@ -240,8 +211,7 @@ class Decl_var {
 abstract class Expr {
 	public Typ typ; // chaque expression est décorée par son type
 
-  abstract void accept(NoexceptVisitor v);
-	abstract void accept(Visitor v) throws CompilerError;
+  abstract void accept(Visitor v);
 }
 
 class Econst extends Expr {
@@ -252,11 +222,7 @@ class Econst extends Expr {
 	}
 
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 }
@@ -269,13 +235,10 @@ class Eaccess_local extends Expr {
 	}
 
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Eaccess_field extends Expr {
@@ -287,11 +250,7 @@ class Eaccess_field extends Expr {
 		this.f = f;
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 }
@@ -305,13 +264,10 @@ class Eassign_local extends Expr {
 		this.e = e;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Eassign_field extends Expr {
@@ -325,13 +281,10 @@ class Eassign_field extends Expr {
 		this.e2 = e2;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Eunop extends Expr {
@@ -343,13 +296,10 @@ class Eunop extends Expr {
 		this.e = e;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Ebinop extends Expr {
@@ -363,13 +313,10 @@ class Ebinop extends Expr {
 		this.e2 = e2;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Ecall extends Expr {
@@ -381,13 +328,10 @@ class Ecall extends Expr {
 		this.el = el;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Esizeof extends Expr {
@@ -397,31 +341,46 @@ class Esizeof extends Expr {
 		this.s = s;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 // instruction
 
 abstract class Stmt {
-	abstract void accept(NoexceptVisitor v);
-	abstract void accept(Visitor v) throws CompilerError;
+	abstract void accept(Visitor v);
 }
 
 class Sskip extends Stmt {
 	Sskip() {
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
+}
+
+class Sbreak extends Stmt {
+	public Swhile loop;
+	Sbreak(Swhile loop) {
+		this.loop = loop;
+	}
+
+	void accept(Visitor v) {
+		v.visit(this);
+	}
+}
+
+class Scontinue extends Stmt {
+	public Swhile loop;
+	Scontinue(Swhile loop) {
+		this.loop = loop;
+	}
+
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 }
@@ -433,13 +392,10 @@ class Sexpr extends Stmt {
 		this.e = e;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Sif extends Stmt {
@@ -453,13 +409,10 @@ class Sif extends Stmt {
 		this.s2 = s2;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Swhile extends Stmt {
@@ -471,13 +424,10 @@ class Swhile extends Stmt {
 		this.s = s;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Sblock extends Stmt {
@@ -489,13 +439,10 @@ class Sblock extends Stmt {
 		this.sl = sl;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 class Sreturn extends Stmt {
@@ -505,13 +452,10 @@ class Sreturn extends Stmt {
 		this.e = e;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 // fonction
@@ -530,13 +474,10 @@ class Decl_fun {
 		this.fun_body = fun_body;
 	}
 
-	void accept(NoexceptVisitor v) {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 
-	void accept(Visitor v) throws CompilerError {
-		v.visit(this);
-	}
 }
 
 // programme = liste de fonctions
@@ -548,16 +489,12 @@ class File {
 		this.funs = funs;
 	}
 
-	void accept(NoexceptVisitor v) {
-		v.visit(this);
-	}
-
-	void accept(Visitor v) throws CompilerError {
+	void accept(Visitor v) {
 		v.visit(this);
 	}
 }
 
-interface NoexceptVisitor {
+interface Visitor {
 	public void visit(Unop n);
 	public void visit(Binop n);
 	public void visit(String n);
@@ -579,6 +516,8 @@ interface NoexceptVisitor {
 	public void visit(Ecall n);
 	public void visit(Esizeof n);
 	public void visit(Sskip n);
+	public void visit(Sbreak n);
+	public void visit(Scontinue n);
 	public void visit(Sexpr n);
 	public void visit(Sif n);
 	public void visit(Swhile n);
@@ -586,35 +525,4 @@ interface NoexceptVisitor {
 	public void visit(Sreturn n);
 	public void visit(Decl_fun n);
 	public void visit(File n);
-}
-
-interface Visitor {
-	public void visit(Unop n) throws CompilerError;
-	public void visit(Binop n) throws CompilerError;
-	public void visit(String n) throws CompilerError;
-	public void visit(Tint n) throws CompilerError;
-	public void visit(Tstructp n) throws CompilerError;
-	public void visit(Tvoidstar n) throws CompilerError;
-	public void visit(Ttypenull n) throws CompilerError;
-	public void visit(Structure n) throws CompilerError;
-	public void visit(Field n) throws CompilerError;
-	public void visit(Decl_var n) throws CompilerError;
-	public void visit(Expr n) throws CompilerError;
-	public void visit(Econst n) throws CompilerError;
-	public void visit(Eaccess_local n) throws CompilerError;
-	public void visit(Eaccess_field n) throws CompilerError;
-	public void visit(Eassign_local n) throws CompilerError;
-	public void visit(Eassign_field n) throws CompilerError;
-	public void visit(Eunop n) throws CompilerError;
-	public void visit(Ebinop n) throws CompilerError;
-	public void visit(Ecall n) throws CompilerError;
-	public void visit(Esizeof n) throws CompilerError;
-	public void visit(Sskip n) throws CompilerError;
-	public void visit(Sexpr n) throws CompilerError;
-	public void visit(Sif n) throws CompilerError;
-	public void visit(Swhile n) throws CompilerError;
-	public void visit(Sblock n) throws CompilerError;
-	public void visit(Sreturn n) throws CompilerError;
-	public void visit(Decl_fun n) throws CompilerError;
-	public void visit(File n) throws CompilerError;
 }

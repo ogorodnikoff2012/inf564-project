@@ -314,6 +314,16 @@ class Pskip extends Pstmt {
 
 }
 
+class Pbreak extends Pstmt {
+	Pbreak(Loc loc) { super(loc); }
+	void accept(Pvisitor v) throws SyntaxError { v.visit(this); }
+}
+
+class Pcontinue extends Pstmt {
+	Pcontinue(Loc loc) { super(loc); }
+	void accept(Pvisitor v) throws SyntaxError { v.visit(this); }
+}
+
 class Preturn extends Pstmt {
 	Pexpr e;
 
@@ -397,6 +407,10 @@ interface Pvisitor {
 	public void visit(Psizeof n) throws SyntaxError;
 
 	public void visit(Pskip n);
+
+	public void visit(Pbreak n) throws SyntaxError;
+
+	public void visit(Pcontinue n) throws SyntaxError;
 
 	public void visit(Peval n) throws SyntaxError, TypeError;
 

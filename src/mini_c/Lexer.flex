@@ -151,6 +151,12 @@ hexa               = [:digit:] | [abcdefABCDEF]
     "sizeof"
     { return symbol(SIZEOF); }
 
+    "break"
+    { return symbol(BREAK); }
+
+    "continue"
+    { return symbol(CONTINUE); }
+
     {Identifier}
     { return symbol(IDENT, yytext().intern()); }
     // The call to intern() allows identifiers to be compared using == .

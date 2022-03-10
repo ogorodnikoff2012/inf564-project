@@ -6,7 +6,7 @@ terminal Integer INTEGER;
 terminal Binop CMP;
 terminal  INT, STRUCT, IF, ELSE, WHILE, RETURN, SIZEOF,
 	     LP, RP, LBRA,RBRA, COMMA, EQUAL, BARBAR, AMPAMP, EQ, NEQ,
-		  PLUS, MINUS, TIMES, DIV, ARROW, NOT, SEMICOLON;
+		  PLUS, MINUS, TIMES, DIV, ARROW, NOT, SEMICOLON, BREAK, CONTINUE;
 terminal UMINUS;
 
 non terminal Pfile file;
@@ -92,6 +92,10 @@ stmt ::=
     {: RESULT =  new Pskip(new Loc(locleft, locright)); :}
 | RETURN:loc expr:e SEMICOLON
     {: RESULT =  new Preturn(e, new Loc(locleft, locright)); :}
+| BREAK:loc SEMICOLON
+    {: RESULT =  new Pbreak(new Loc(locleft, locright)); :}
+| CONTINUE:loc SEMICOLON
+    {: RESULT =  new Pcontinue(new Loc(locleft, locright)); :}
 | IF:loc LP expr:c RP stmt:s1
     {: Loc locif = new Loc(locleft, locright);
        RESULT =  new Pif(c, s1, new Pskip(locif), locif); :}

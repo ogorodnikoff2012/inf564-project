@@ -1,6 +1,6 @@
 package mini_c;
 
-public class TtreePrinterVisitor implements NoexceptVisitor {
+public class TtreePrinterVisitor implements Visitor {
 
   private final StringBuilder sBuilder = new StringBuilder();
   private boolean indentPrinted = false;
@@ -166,6 +166,18 @@ public class TtreePrinterVisitor implements NoexceptVisitor {
   public void visit(Sskip n) {
     println("!!! STUB ", n.getClass().getName());
 
+  }
+
+  @Override
+  public void visit(Sbreak n) {
+
+    println("!!! STUB ", n.getClass().getName());
+  }
+
+  @Override
+  public void visit(Scontinue n) {
+
+    println("!!! STUB ", n.getClass().getName());
   }
 
   @Override
