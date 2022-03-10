@@ -36,7 +36,7 @@ public class Machine {
     (r.isHW() ? this.hwregs : this.regs).put(r, v);
   }
   void set(Register r, boolean b) {
-    this.regs.put(r, b ? 1L : 0L);
+    set(r, b ? 1L : 0L);
   }
   long get(Register r) {
     if (r.isHW()) return this.hwregs.containsKey(r) ? this.hwregs.get(r) : 0L;

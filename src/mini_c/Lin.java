@@ -50,6 +50,7 @@ public class Lin implements LTLVisitor {
     asm.cmpq(val, lmubranch.r.toString()); // r -= val
 
     if (!visited.contains(lmubranch.l2)) {
+      asm.needLabel(lmubranch.l1);
       if (lmubranch.m instanceof Mjz) {
         asm.jz(lmubranch.l1.name);
       } else if (lmubranch.m instanceof Mjnz) {
@@ -64,6 +65,7 @@ public class Lin implements LTLVisitor {
       lin(lmubranch.l2);
       lin(lmubranch.l1);
     } else if (!visited.contains(lmubranch.l1)) {
+      asm.needLabel(lmubranch.l2);
       if (lmubranch.m instanceof Mjz) {
         asm.jnz(lmubranch.l2.name);
       } else if (lmubranch.m instanceof Mjnz) {
@@ -78,6 +80,9 @@ public class Lin implements LTLVisitor {
       lin(lmubranch.l1);
       lin(lmubranch.l2);
     } else {
+      asm.needLabel(lmubranch.l1);
+      asm.needLabel(lmubranch.l2);
+
       if (lmubranch.m instanceof Mjz) {
         asm.jz(lmubranch.l1.name);
       } else if (lmubranch.m instanceof Mjnz) {
@@ -98,6 +103,8 @@ public class Lin implements LTLVisitor {
     asm.cmpq(lmbbranch.r1.toString(), lmbbranch.r2.toString());
 
     if (!visited.contains(lmbbranch.l2)) {
+      asm.needLabel(lmbbranch.l1);
+
       switch (lmbbranch.m) {
         case Mjl:
           asm.jl(lmbbranch.l1.name);
@@ -110,6 +117,8 @@ public class Lin implements LTLVisitor {
       lin(lmbbranch.l2);
       lin(lmbbranch.l1);
     } else if (!visited.contains(lmbbranch.l1)) {
+      asm.needLabel(lmbbranch.l2);
+
       switch (lmbbranch.m) {
         case Mjl:
           asm.jge(lmbbranch.l2.name);
@@ -122,6 +131,9 @@ public class Lin implements LTLVisitor {
       lin(lmbbranch.l1);
       lin(lmbbranch.l2);
     } else {
+      asm.needLabel(lmbbranch.l1);
+      asm.needLabel(lmbbranch.l2);
+
       switch (lmbbranch.m) {
         case Mjl:
           asm.jl(lmbbranch.l1.name);
@@ -138,6 +150,7 @@ public class Lin implements LTLVisitor {
   @Override
   public void visit(Lgoto lgoto) {
     if (visited.contains(lgoto.l)) {
+      asm.needLabel(lgoto.l);
       asm.jmp(lgoto.l.name);
     } else {
       lin(lgoto.l);
@@ -160,17 +173,15 @@ public class Lin implements LTLVisitor {
     if (lmunop.m instanceof Maddi) {
       asm.addq(((Maddi) lmunop.m).n, lmunop.o.toString());
     } else if (lmunop.m instanceof  Msetei) {
-      asm.xchg(lmunop.o.toString(), Register.rax.name);
+      assert (lmunop.o instanceof Reg) && (((Reg) lmunop.o).r.equals(Register.rax));
       asm.cmpq(((Msetei) lmunop.m).n, Register.rax.name);
       asm.sete("%al");
       asm.movzbq("%al", Register.rax.name);
-      asm.xchg(lmunop.o.toString(), Register.rax.name);
     } else {
-      asm.xchg(lmunop.o.toString(), Register.rax.name);
+      assert (lmunop.o instanceof Reg) && (((Reg) lmunop.o).r.equals(Register.rax));
       asm.cmpq(((Msetnei) lmunop.m).n, Register.rax.name);
       asm.setne("%al");
       asm.movzbq("%al", Register.rax.name);
-      asm.xchg(lmunop.o.toString(), Register.rax.name);
     }
     lin(lmunop.l);
   }
@@ -198,28 +209,40 @@ public class Lin implements LTLVisitor {
         asm.idivq(lhs);
         break;
       case Msete:
+        assert Register.rax.name.equals(rhs);
         asm.cmpq(lhs, rhs);
-        asm.sete(rhs);
+        asm.sete("%al");
+        asm.movzbq("%al", Register.rax.name);
         break;
       case Msetne:
+        assert Register.rax.name.equals(rhs);
         asm.cmpq(lhs, rhs);
-        asm.setne(rhs);
+        asm.setne("%al");
+        asm.movzbq("%al", Register.rax.name);
         break;
       case Msetl:
+        assert Register.rax.name.equals(rhs);
         asm.cmpq(lhs, rhs);
-        asm.setl(rhs);
+        asm.setl("%al");
+        asm.movzbq("%al", Register.rax.name);
         break;
       case Msetle:
+        assert Register.rax.name.equals(rhs);
         asm.cmpq(lhs, rhs);
-        asm.setle(rhs);
+        asm.setle("%al");
+        asm.movzbq("%al", Register.rax.name);
         break;
       case Msetg:
+        assert Register.rax.name.equals(rhs);
         asm.cmpq(lhs, rhs);
-        asm.setg(rhs);
+        asm.setg("%al");
+        asm.movzbq("%al", Register.rax.name);
         break;
       case Msetge:
+        assert Register.rax.name.equals(rhs);
         asm.cmpq(lhs, rhs);
-        asm.setge(rhs);
+        asm.setge("%al");
+        asm.movzbq("%al", Register.rax.name);
         break;
     }
     lin(lmbinop.l);

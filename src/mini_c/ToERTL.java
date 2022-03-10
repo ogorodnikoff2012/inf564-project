@@ -1,6 +1,7 @@
 package mini_c;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -40,16 +41,29 @@ public class ToERTL implements RTLVisitor {
   @Override
   public void visit(Rmunop rmunop) {
     assert this.ertl == null;
-    this.ertl = new ERmunop(rmunop.m, rmunop.r, rmunop.l);
+    Label l2 = this.ertlFun.body.add(new ERmbinop(Mbinop.Mmov, Register.rax, rmunop.r, rmunop.l));
+    Label l1 = this.ertlFun.body.add(new ERmunop(rmunop.m, Register.rax, l2));
+    this.ertl = new ERmbinop(Mbinop.Mmov, rmunop.r, Register.rax, l1);
+  }
+
+  private static final HashSet<Mbinop> kBinopsRequireRax = new HashSet<>();
+  static {
+    kBinopsRequireRax.add(Mbinop.Mdiv);
+    kBinopsRequireRax.add(Mbinop.Msete);
+    kBinopsRequireRax.add(Mbinop.Msetne);
+    kBinopsRequireRax.add(Mbinop.Msetl);
+    kBinopsRequireRax.add(Mbinop.Msetle);
+    kBinopsRequireRax.add(Mbinop.Msetg);
+    kBinopsRequireRax.add(Mbinop.Msetge);
   }
 
   @Override
   public void visit(Rmbinop rmbinop) {
     assert this.ertl == null;
-    if (rmbinop.m == Mbinop.Mdiv) {
+    if (kBinopsRequireRax.contains(rmbinop.m)) {
       Label movResult = this.ertlFun.body.add(new ERmbinop(Mbinop.Mmov, Register.rax, rmbinop.r2,
           rmbinop.l));
-      Label div = this.ertlFun.body.add(new ERmbinop(Mbinop.Mdiv, rmbinop.r1, Register.rax, movResult));
+      Label div = this.ertlFun.body.add(new ERmbinop(rmbinop.m, rmbinop.r1, Register.rax, movResult));
       this.ertl = new ERmbinop(Mbinop.Mmov, rmbinop.r2, Register.rax, div);
     } else {
       this.ertl = new ERmbinop(rmbinop.m, rmbinop.r1, rmbinop.r2, rmbinop.l);
