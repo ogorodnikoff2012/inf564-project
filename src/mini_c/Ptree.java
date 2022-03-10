@@ -16,7 +16,9 @@ enum Unop {
 // une classe pour les localisations
 class Loc {
   final int line, column;
-  
+
+  public static final Loc nullLoc = new Loc(-1, -1);
+
   Loc(int line, int column) {
     this.line = line;
     this.column = column;
@@ -35,6 +37,20 @@ class Pstring {
     this.id = id;
     this.loc = loc;
   }
+
+	@Override
+	public boolean equals(Object o) {
+		return false;
+	}
+
+	public boolean equals(String str) {
+		throw new Error("Mustn't be called");
+	}
+
+	public boolean equals(Pstring str) {
+  	return id.equals(str.id) && loc.equals(str.loc);
+	}
+
   @Override
   public String toString() {
     return this.id;
@@ -48,25 +64,25 @@ class Pfile {
 		super();
 		this.l = l;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}	
 }
 
 abstract class Pdecl {
-	abstract void accept(Pvisitor v);
+	abstract void accept(Pvisitor v) throws SyntaxError, TypeError;
 }
 
 class Pstruct extends Pdecl {
-	String s;
+	Pstring s;
 	LinkedList<Pdeclvar> fl;
 
-	public Pstruct(String s, LinkedList<Pdeclvar> fl) {
+	public Pstruct(Pstring s, LinkedList<Pdeclvar> fl) {
 		super();
 		this.s = s;
 		this.fl = fl;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}	
 }
@@ -86,7 +102,7 @@ class Pfun extends Pdecl {
 		this.pl = pl;
 		this.b = b;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}	
 }
@@ -110,7 +126,7 @@ abstract class Ptype {
 	static Ptype ptint = new PTint();
 	static Ptype ptvoidstar = new PTvoidstar();
 	static Ptype ptypenull = new PTypenull();
-	abstract void accept(Pvisitor v);
+	abstract void accept(Pvisitor v) throws SyntaxError;
 }
 
 class PTint extends Ptype {
@@ -128,7 +144,7 @@ class PTstruct extends Ptype {
 		this.id = id.id;
 		this.loc = id.loc;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError {
 		v.visit(this);
 	}
 }
@@ -150,7 +166,7 @@ class PTypenull extends Ptype {
 abstract class Pexpr {
   Loc loc;
   Pexpr(Loc loc) { this.loc = loc; }
-  abstract void accept(Pvisitor v);
+  abstract void accept(Pvisitor v) throws SyntaxError, TypeError;
 }
 
 abstract class Plvalue extends Pexpr{
@@ -158,13 +174,13 @@ abstract class Plvalue extends Pexpr{
 }
 
 class Pident extends Plvalue {
-	String id;
+	Pstring id;
 
 	public Pident(Pstring id) {
 		super(id.loc);
-		this.id = id.id;
+		this.id = id;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError {
 		v.visit(this);
 	}	
 }
@@ -184,13 +200,13 @@ class Pint extends Pexpr {
 
 class Parrow extends Plvalue {
 	Pexpr e;
-	String f;
-	public Parrow(Pexpr e, String f) {
+	Pstring f;
+	public Parrow(Pexpr e, Pstring f) {
 		super(e.loc);
 		this.e = e;
 		this.f = f;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws TypeError, SyntaxError {
 		v.visit(this);
 	}
 }
@@ -204,7 +220,7 @@ class Passign extends Pexpr {
     this.e1 = e1;
     this.e2 = e2;
   }
-  void accept(Pvisitor v) {
+  void accept(Pvisitor v) throws TypeError, SyntaxError {
     v.visit(this);
   }
 }
@@ -219,7 +235,7 @@ class Pbinop extends Pexpr {
 		this.e1 = e1;
 		this.e2 = e2;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 }
@@ -233,7 +249,7 @@ class Punop extends Pexpr {
 		this.op = op;
 		this.e1 = e1;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 }
@@ -248,19 +264,19 @@ class Pcall extends Pexpr {
 		this.f = f.id;
 		this.l = l;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 }
 
 class Psizeof extends Pexpr {
-	String id;
+	Pstring id;
 
-	public Psizeof(String id, Loc loc) {
+	public Psizeof(Pstring id, Loc loc) {
 		super(loc);
 		this.id = id;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError {
 		v.visit(this);
 	}
 
@@ -271,7 +287,7 @@ class Psizeof extends Pexpr {
 abstract class Pstmt {
   Loc loc;
   Pstmt(Loc loc) { this.loc = loc; }
-	abstract void accept(Pvisitor v);
+	abstract void accept(Pvisitor v) throws SyntaxError, TypeError;
 
 }
 
@@ -284,7 +300,7 @@ class Pbloc extends Pstmt {
 		this.vl = vl;
 		this.sl = sl;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 
@@ -306,7 +322,7 @@ class Preturn extends Pstmt {
 		this.e = e;
 	}
 
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 
@@ -322,7 +338,7 @@ class Pif extends Pstmt {
 		this.s1 = s1;
 		this.s2 = s2;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 
@@ -335,7 +351,7 @@ class Peval extends Pstmt {
 		super(e.loc);
 		this.e = e;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 }
@@ -349,7 +365,7 @@ class Pwhile extends Pstmt {
 		this.e = e;
 		this.s1 = s1;
 	}
-	void accept(Pvisitor v) {
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
 		v.visit(this);
 	}
 }
@@ -358,7 +374,7 @@ interface Pvisitor {
 
 	public void visit(PTint n);
 	
-	public void visit(PTstruct n);
+	public void visit(PTstruct n) throws SyntaxError;
 
 	public void visit(PTvoidstar n);
 
@@ -366,35 +382,35 @@ interface Pvisitor {
 	
 	public void visit(Pint n);
 
-	public void visit(Pident n);
+	public void visit(Pident n) throws SyntaxError;
 
-	public void visit(Punop n);
+	public void visit(Punop n) throws SyntaxError, TypeError;
   
-	public void visit(Passign n);
+	public void visit(Passign n) throws TypeError, SyntaxError;
 
-	public void visit(Pbinop n);
+	public void visit(Pbinop n) throws SyntaxError, TypeError;
 
-	public void visit(Parrow n);
+	public void visit(Parrow n) throws TypeError, SyntaxError;
 
-	public void visit(Pcall n);
+	public void visit(Pcall n) throws SyntaxError, TypeError;
 
-	public void visit(Psizeof n);
+	public void visit(Psizeof n) throws SyntaxError;
 
 	public void visit(Pskip n);
 
-	public void visit(Peval n);
+	public void visit(Peval n) throws SyntaxError, TypeError;
 
-	public void visit(Pif n);
+	public void visit(Pif n) throws SyntaxError, TypeError;
 
-	public void visit(Pwhile n);
+	public void visit(Pwhile n) throws SyntaxError, TypeError;
 
-	public void visit(Pbloc n);
+	public void visit(Pbloc n) throws SyntaxError, TypeError;
 
-	public void visit(Preturn n);
+	public void visit(Preturn n) throws SyntaxError, TypeError;
 
-	public void visit(Pstruct n);
+	public void visit(Pstruct n) throws SyntaxError, TypeError;
 
-	public void visit(Pfun n);
+	public void visit(Pfun n) throws SyntaxError, TypeError;
 
-	public void visit(Pfile n);
+	public void visit(Pfile n) throws SyntaxError, TypeError;
 }

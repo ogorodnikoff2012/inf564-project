@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ToRTL implements Visitor {
+public class ToRTL implements NoexceptVisitor {
 
   private RTLfile rtlFile = null;
   private RTLfun rtlFun = null;
@@ -31,57 +31,57 @@ public class ToRTL implements Visitor {
 
   @Override
   public void visit(Unop unop) {
-    throw new Error("Not implemented yet: Unop");
+    throw new Error("Mustn't be called: Unop");
   }
 
   @Override
   public void visit(Binop binop) {
-    throw new Error("Not implemented yet: Binop");
+    throw new Error("Mustn't be called: Binop");
   }
 
   @Override
   public void visit(String string) {
-    throw new Error("Not implemented yet: String");
+    throw new Error("Mustn't be called: String");
   }
 
   @Override
   public void visit(Tint tint) {
-    throw new Error("Not implemented yet: Tint");
+    throw new Error("Mustn't be called: Tint");
   }
 
   @Override
   public void visit(Tstructp tstructp) {
-    throw new Error("Not implemented yet: Tstructp");
+    throw new Error("Mustn't be called: Tstructp");
   }
 
   @Override
   public void visit(Tvoidstar tvoidstar) {
-    throw new Error("Not implemented yet: Tvoidstar");
+    throw new Error("Mustn't be called: Tvoidstar");
   }
 
   @Override
   public void visit(Ttypenull ttypenull) {
-    throw new Error("Not implemented yet: Ttypenull");
+    throw new Error("Mustn't be called: Ttypenull");
   }
 
   @Override
   public void visit(Structure structure) {
-    throw new Error("Not implemented yet: Structure");
+    throw new Error("Mustn't be called: Structure");
   }
 
   @Override
   public void visit(Field field) {
-    throw new Error("Not implemented yet: Field");
+    throw new Error("Mustn't be called: Field");
   }
 
   @Override
   public void visit(Decl_var decl_var) {
-    throw new Error("Not implemented yet: Decl_var");
+    throw new Error("Mustn't be called: Decl_var");
   }
 
   @Override
   public void visit(Expr expr) {
-    throw new Error("Not implemented yet: Expr");
+    throw new Error("Mustn't be called: Expr");
   }
 
   @Override
@@ -374,14 +374,14 @@ class ScopeStack {
   public void openScope(List<Decl_var> variableDeclarations) {
     HashMap<String, Register> scope = new HashMap<>();
     for (Decl_var decl_var : variableDeclarations) {
-      scope.put(decl_var.name, new Register());
+      scope.put(decl_var.name.id, new Register());
     }
     scopes.push(scope);
   }
 
-  public Register resolve(String name) {
+  public Register resolve(Pstring name) {
     for (HashMap<String, Register> scope : scopes) {
-      Register reg = scope.get(name);
+      Register reg = scope.get(name.id);
       if (reg != null) {
         return reg;
       }

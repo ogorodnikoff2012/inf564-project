@@ -30,7 +30,7 @@ public class Typing implements Pvisitor {
   // il faut compléter le visiteur ci-dessous pour réaliser le typage
 
   @Override
-  public void visit(Pfile n) {
+  public void visit(Pfile n) throws SyntaxError, TypeError {
     LinkedList<Decl_fun> functionDeclarations = new LinkedList<>();
     file = new File(functionDeclarations);
 
@@ -40,34 +40,34 @@ public class Typing implements Pvisitor {
       pdecl.accept(this);
     }
 
-    resolveFunction("main");
+    resolveFunction(new Pstring("main", Loc.nullLoc));
   }
 
-  private void addPredefinedFunctions() {
+  private void addPredefinedFunctions() throws SyntaxError, TypeError {
     Pfun functions[] = new Pfun[]{
         new Pfun(
             Ptype.ptint,
-            new Pstring("putchar", null),
+            new Pstring("putchar", Loc.nullLoc),
             new LinkedList<Pdeclvar>(Arrays.asList(new Pdeclvar(
                 Ptype.ptint,
-                new Pstring("c", null)
+                new Pstring("c", Loc.nullLoc)
             ))),
             new Pbloc(
                 new LinkedList<>(),
                 new LinkedList<>(),
-                null)
+                Loc.nullLoc)
         ),
         new Pfun(
             Ptype.ptvoidstar,
-            new Pstring("sbrk", null),
+            new Pstring("sbrk", Loc.nullLoc),
             new LinkedList<Pdeclvar>(Arrays.asList(new Pdeclvar(
                 Ptype.ptint,
-                new Pstring("n", null)
+                new Pstring("n", Loc.nullLoc)
             ))),
             new Pbloc(
                 new LinkedList<>(),
                 new LinkedList<>(),
-                null)
+                Loc.nullLoc)
         ),
     };
 
@@ -82,8 +82,8 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(PTstruct n) {
-    this.typ = new Tstructp(resolveStructure(n.id));
+  public void visit(PTstruct n) throws SyntaxError {
+    this.typ = new Tstructp(resolveStructure(new Pstring(n.id, n.loc)));
   }
 
   @Override
@@ -103,13 +103,13 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Pident n) {
+  public void visit(Pident n) throws SyntaxError {
     this.expr = new Eaccess_local(n.id);
     this.expr.typ = resolveLocalType(n.id);
   }
 
   @Override
-  public void visit(Punop n) {
+  public void visit(Punop n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e1.accept(this);
     Expr e = this.expr;
@@ -117,13 +117,13 @@ public class Typing implements Pvisitor {
     assert e.typ != null;
     this.expr = old_expr;
 
-    Typ type = resolveUnopType(n.op, e.typ);
+    Typ type = resolveUnopType(n.op, e.typ, n.loc);
     this.expr = new Eunop(n.op, e);
     this.expr.typ = type;
   }
 
   @Override
-  public void visit(Passign n) {
+  public void visit(Passign n) throws TypeError, SyntaxError {
     n.e2.accept(this);
     Expr e2 = this.expr;
     assert e2 != null;
@@ -142,7 +142,7 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Pbinop n) {
+  public void visit(Pbinop n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e1.accept(this);
     Expr e1 = this.expr;
@@ -156,14 +156,14 @@ public class Typing implements Pvisitor {
     assert e2.typ != null;
     this.expr = old_expr;
 
-    Typ type = resolveBinopType(n.op, e1.typ, e2.typ);
+    Typ type = resolveBinopType(n.op, e1.typ, e2.typ, n.loc);
 
     this.expr = new Ebinop(n.op, e1, e2);
     this.expr.typ = type;
   }
 
   @Override
-  public void visit(Parrow n) {
+  public void visit(Parrow n) throws TypeError, SyntaxError {
     n.e.accept(this);
     Expr e = this.expr;
     assert e != null;
@@ -174,7 +174,8 @@ public class Typing implements Pvisitor {
     this.expr.typ = eaccess_field.f.field_typ;
   }
 
-  private LinkedList<Expr> collect_expr(LinkedList<Pexpr> pexpr_list) {
+  private LinkedList<Expr> collect_expr(LinkedList<Pexpr> pexpr_list)
+      throws SyntaxError, TypeError {
     LinkedList<Expr> expr_list = new LinkedList<>();
 
     for (Pexpr pexpr : pexpr_list) {
@@ -188,16 +189,16 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Pcall n) {
+  public void visit(Pcall n) throws SyntaxError, TypeError {
     LinkedList<Expr> expr_list = collect_expr(n.l);
     this.expr = new Ecall(n.f, expr_list);
-    Decl_fun decl_fun = resolveFunction(n.f);
-    verifyFunctionArguments(decl_fun, expr_list);
+    Decl_fun decl_fun = resolveFunction(new Pstring(n.f, n.loc));
+    verifyFunctionArguments(decl_fun, expr_list, n.loc);
     this.expr.typ = decl_fun.fun_typ;
   }
 
   @Override
-  public void visit(Psizeof n) {
+  public void visit(Psizeof n) throws SyntaxError {
     this.expr = new Esizeof(resolveStructure(n.id));
     this.expr.typ = Tint.tint;
   }
@@ -208,7 +209,7 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Peval n) {
+  public void visit(Peval n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e.accept(this);
     Expr expr = this.expr;
@@ -220,7 +221,7 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Pif n) {
+  public void visit(Pif n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e.accept(this);
     Expr expr = this.expr;
@@ -236,7 +237,7 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Pwhile n) {
+  public void visit(Pwhile n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e.accept(this);
     Expr e = this.expr;
@@ -248,7 +249,8 @@ public class Typing implements Pvisitor {
     this.stmt = new Swhile(e, s);
   }
 
-  private void collect_stmt(LinkedList<Pstmt> pstmt_list, LinkedList<Stmt> result) {
+  private void collect_stmt(LinkedList<Pstmt> pstmt_list, LinkedList<Stmt> result)
+      throws SyntaxError, TypeError {
     for (Pstmt pstmt : pstmt_list) {
       Stmt old_stmt = this.stmt;
       pstmt.accept(this);
@@ -258,7 +260,7 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Pbloc n) {
+  public void visit(Pbloc n) throws SyntaxError, TypeError {
     LinkedList<Decl_var> decl_var = new LinkedList<>();
     LinkedList<Stmt> stmts = new LinkedList<>();
     Sblock block = new Sblock(decl_var, stmts);
@@ -272,7 +274,7 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Preturn n) {
+  public void visit(Preturn n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e.accept(this);
     this.stmt = new Sreturn(this.expr);
@@ -280,12 +282,12 @@ public class Typing implements Pvisitor {
   }
 
   @Override
-  public void visit(Pstruct n) {
-    if (findStructure(n.s) != null) {
-      throw new Error("Redefinition of structure " + n.s);
+  public void visit(Pstruct n) throws SyntaxError, TypeError {
+    if (findStructure(n.s.toString()) != null) {
+      throw new SyntaxError("Redefinition of structure " + n.s, n.s.loc);
     }
 
-    Structure structure = new Structure(n.s);
+    Structure structure = new Structure(n.s.id);
     declaredStructures.put(structure.str_name, structure);
 
     LinkedList<Decl_var> decl_var_list = new LinkedList<>();
@@ -296,22 +298,23 @@ public class Typing implements Pvisitor {
     }
   }
 
-  private void collect_decl_var(LinkedList<Pdeclvar> pdeclvar_list, LinkedList<Decl_var> result) {
+  private void collect_decl_var(LinkedList<Pdeclvar> pdeclvar_list, LinkedList<Decl_var> result)
+      throws SyntaxError {
     for (Pdeclvar pdeclvar : pdeclvar_list) {
       Typ old_typ = this.typ;
       pdeclvar.typ.accept(this);
       if (findDeclVar(result, pdeclvar.id) != null) {
-        throw new Error("Redefinition of variable or field: " + pdeclvar.id);
+        throw new SyntaxError("Redefinition of variable or field: " + pdeclvar.id, pdeclvar.loc);
       }
-      result.add(new Decl_var(this.typ, pdeclvar.id));
+      result.add(new Decl_var(this.typ, new Pstring(pdeclvar.id, pdeclvar.loc)));
       this.typ = old_typ;
     }
   }
 
   @Override
-  public void visit(Pfun n) {
+  public void visit(Pfun n) throws SyntaxError, TypeError {
     if (findFunction(n.s) != null) {
-      throw new Error("Redefinition of function " + n.s);
+      throw new SyntaxError("Redefinition of function " + n.s, n.loc);
     }
 
     Typ old_typ = this.typ;
@@ -334,40 +337,40 @@ public class Typing implements Pvisitor {
 
   private static Decl_var findDeclVar(LinkedList<Decl_var> declVars, String varName) {
     for (Decl_var decl_var : declVars) {
-      if (decl_var.name.equals(varName)) {
+      if (decl_var.name.id.equals(varName)) {
         return decl_var;
       }
     }
     return null;
   }
 
-  private Typ resolveLocalType(String localName) {
+  private Typ resolveLocalType(Pstring localName) throws SyntaxError {
     for (Sblock block : blockStack) {
-      Decl_var decl_var = findDeclVar(block.dl, localName);
+      Decl_var decl_var = findDeclVar(block.dl, localName.id);
       if (decl_var != null) {
         return decl_var.t;
       }
     }
 
-    Decl_var decl_var = findDeclVar(this.decl_fun.fun_formals, localName);
+    Decl_var decl_var = findDeclVar(this.decl_fun.fun_formals, localName.id);
     if (decl_var != null) {
       return decl_var.t;
     }
 
-    throw new Error("Undeclared variable: " + localName);
+    throw new SyntaxError("Undeclared variable: " + localName, localName.loc);
   }
 
-  private Field resolveField(Typ type, String fieldName) {
+  private Field resolveField(Typ type, Pstring fieldName) throws TypeError, SyntaxError {
     if (!(type instanceof Tstructp)) {
-      throw new Error("Not a struct: " + type);
+      throw new SyntaxError("Not a struct: " + type, fieldName.loc);
     }
 
     Tstructp structType = (Tstructp) type;
     assert structType.s != null;
 
-    Field field = structType.s.getField(fieldName);
+    Field field = structType.s.getField(fieldName.id);
     if (field == null) {
-      throw new Error("Struct " + structType.s.str_name + " does not have field " + fieldName);
+      throw new TypeError("Struct " + structType.s.str_name + " does not have field " + fieldName, fieldName.loc);
     }
 
     return field;
@@ -382,27 +385,27 @@ public class Typing implements Pvisitor {
     return null;
   }
 
-  private Decl_fun resolveFunction(String functionName) {
-    Decl_fun decl_fun = findFunction(functionName);
+  private Decl_fun resolveFunction(Pstring functionName) throws SyntaxError {
+    Decl_fun decl_fun = findFunction(functionName.id);
     if (decl_fun != null) {
       return decl_fun;
     }
-    throw new Error("Function not declared: " + functionName);
+    throw new SyntaxError("Function not declared: " + functionName, functionName.loc);
   }
 
   private Structure findStructure(String structureName) {
     return declaredStructures.get(structureName);
   }
 
-  private Structure resolveStructure(String structureName) {
-    Structure s = findStructure(structureName);
+  private Structure resolveStructure(Pstring structureName) throws SyntaxError {
+    Structure s = findStructure(structureName.id);
     if (s != null) {
       return s;
     }
-    throw new Error("Structure not declared: " + structureName);
+    throw new SyntaxError("Structure not declared: " + structureName, structureName.loc);
   }
 
-  private Typ resolveBinopType(Binop op, Typ lhs, Typ rhs) {
+  private Typ resolveBinopType(Binop op, Typ lhs, Typ rhs, Loc location) throws TypeError {
     switch (op) {
       case Beq:
       case Bneq:
@@ -427,11 +430,11 @@ public class Typing implements Pvisitor {
         return Tint.tint;
     }
 
-    throw new Error(
-        "Operator " + op + " is not defined for arguments of type `" + lhs + "` and `" + rhs + "`");
+    throw new TypeError(
+        "Operator " + op + " is not defined for arguments of type `" + lhs + "` and `" + rhs + "`", location);
   }
 
-  private Typ resolveUnopType(Unop op, Typ argType) {
+  private Typ resolveUnopType(Unop op, Typ argType, Loc location) throws TypeError {
     switch (op) {
       case Uneg:
         if (Tint.tint.equals(argType)) {
@@ -442,14 +445,14 @@ public class Typing implements Pvisitor {
         return Tint.tint;
     }
 
-    throw new Error("Operator " + op + " is not defined for argument of type `" + argType + "`");
+    throw new TypeError("Operator " + op + " is not defined for argument of type `" + argType + "`", location);
   }
 
-  private void verifyFunctionArguments(Decl_fun decl_fun, LinkedList<Expr> args) {
+  private void verifyFunctionArguments(Decl_fun decl_fun, LinkedList<Expr> args, Loc location) throws TypeError {
     if (decl_fun.fun_formals.size() != args.size()) {
-      throw new Error(
+      throw new TypeError(
           "In function " + decl_fun.fun_name + ": expected " + decl_fun.fun_formals.size()
-              + " arguments, got " + args.size());
+              + " arguments, got " + args.size(), location);
     }
 
     Iterator<Decl_var> paramIter = decl_fun.fun_formals.iterator();
@@ -462,9 +465,9 @@ public class Typing implements Pvisitor {
       Expr arg = argIter.next();
 
       if (!param.t.equals(arg.typ)) {
-        throw new Error(
+        throw new TypeError(
             "Argument " + (argIndex + 1) + ": expected type `" + param.t + "`, got `" + arg.typ
-                + "`");
+                + "`", location);
       }
 
       ++argIndex;

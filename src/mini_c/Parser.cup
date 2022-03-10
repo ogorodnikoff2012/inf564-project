@@ -45,7 +45,7 @@ file ::=
 ;
 
 decl ::=
-  STRUCT IDENT:s LBRA list_decl_var:fl RBRA SEMICOLON
+  STRUCT ident:s LBRA list_decl_var:fl RBRA SEMICOLON
     {: RESULT = new Pstruct(s, fl); :}
 | decl_fun:d
     {: RESULT = d; :}
@@ -108,7 +108,7 @@ stmt ::=
 lvalue ::=
   ident:id
     {: RESULT = new Pident(id); :}
-| expr:e1 ARROW IDENT:id
+| expr:e1 ARROW ident:id
     {: RESULT = new Parrow(e1, id); :}
 ;
 
@@ -146,7 +146,7 @@ expr ::=
     {: RESULT = new Pcall (f, l); :}
 | LP expr:e RP
     {: RESULT = e; :}
-| SIZEOF:op LP STRUCT IDENT:id  RP
+| SIZEOF:op LP STRUCT ident:id  RP
     {: RESULT = new Psizeof(id, new Loc(opleft, opright)); :}
 ;
 

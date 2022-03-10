@@ -268,7 +268,7 @@ public class Lin implements LTLVisitor {
 
   @Override
   public void visit(LTLfun ltlfun) {
-    throw new Error("Not implemented yet: LTLfun");
+    throw new Error("Mustn't be called: LTLfun");
   }
 
   @Override

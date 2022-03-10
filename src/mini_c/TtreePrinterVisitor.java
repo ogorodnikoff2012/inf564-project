@@ -1,6 +1,6 @@
 package mini_c;
 
-public class TtreePrinterVisitor implements Visitor {
+public class TtreePrinterVisitor implements NoexceptVisitor {
 
   private final StringBuilder sBuilder = new StringBuilder();
   private boolean indentPrinted = false;
@@ -55,7 +55,7 @@ public class TtreePrinterVisitor implements Visitor {
 
   @Override
   public void visit(Decl_var n) {
-    println("Name: ", n.name);
+    println("Name: ", n.name.id);
     print("Type: ");
     n.t.accept(this);
     println();
@@ -77,7 +77,7 @@ public class TtreePrinterVisitor implements Visitor {
   public void visit(Eaccess_local n) {
     println("Eaccess_local: ");
     indentIn();
-    println("Name: ", n.i);
+    println("Name: ", n.i.id);
     print("Type: ");
     n.typ.accept(this);
     println();
@@ -88,7 +88,7 @@ public class TtreePrinterVisitor implements Visitor {
   public void visit(Eaccess_field n) {
     println("Eaccess_field:");
     indentIn();
-    println("Field: ", n.f.field_name);
+    println("Field: ", n.f.field_name.id);
     print("Type: ");
     n.f.field_typ.accept(this);
     println();
@@ -103,7 +103,7 @@ public class TtreePrinterVisitor implements Visitor {
   public void visit(Eassign_local n) {
     println("Eassign_local:");
     indentIn();
-    println("LHS: ", n.i);
+    println("LHS: ", n.i.id);
     println("RHS:");
     indentIn();
     n.e.accept(this);

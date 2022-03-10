@@ -18,6 +18,21 @@ public class Main {
     System.exit(1);
   }
 
+  private static void printCompilerError(String filename, CompilerError err) {
+    Loc location = err.getLocation();
+    StringBuilder sb = new StringBuilder();
+    sb
+        .append("File \"")
+        .append(filename)
+        .append("\", line ")
+        .append(location.line + 1)
+        .append(", column ")
+        .append(location.column + 1)
+        .append(":\n")
+        .append(err.getMessage());
+    System.err.println(sb.toString());
+  }
+
   public static void main(String[] args) throws Exception {
     for (String arg: args)
       if (arg.equals("--parse-only"))
@@ -45,7 +60,12 @@ public class Main {
     Pfile f = (Pfile) parser.parse().value;
     if (parse_only) System.exit(0);
     Typing typer = new Typing();
-    typer.visit(f);
+    try {
+      typer.visit(f);
+    } catch (CompilerError err) {
+      printCompilerError(file, err);
+      System.exit(1);
+    }
     File tf = typer.getFile();
     if (type_only) System.exit(0);
     RTLfile rtl = (new ToRTL()).translate(tf);
