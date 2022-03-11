@@ -1,8 +1,5 @@
 package mini_c;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 public class Main {
 
   static boolean parse_only = false;
@@ -74,6 +71,10 @@ public class Main {
     }
     File tf = typer.getFile();
     if (type_only) System.exit(0);
+
+    // Optimization
+    tf = new ConstEvalOptimizer().transform(tf);
+
     RTLfile rtl = (new ToRTL()).translate(tf);
     if (debug) rtl.print();
     if (interp_rtl) { System.exit((int) new RTLinterp(rtl).interpret()); }

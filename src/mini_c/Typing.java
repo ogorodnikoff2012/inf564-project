@@ -324,6 +324,9 @@ public class Typing implements Pvisitor {
   public void visit(Preturn n) throws SyntaxError, TypeError {
     Expr old_expr = this.expr;
     n.e.accept(this);
+    if (!this.expr.typ.equals(this.decl_fun.fun_typ)) {
+      throw new TypeError("Return value type differs from function type",n.loc);
+    }
     this.stmt = new Sreturn(this.expr);
     this.expr = old_expr;
   }
