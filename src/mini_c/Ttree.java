@@ -364,9 +364,7 @@ class Sskip extends Stmt {
 }
 
 class Sbreak extends Stmt {
-	public Swhile loop;
-	Sbreak(Swhile loop) {
-		this.loop = loop;
+	Sbreak() {
 	}
 
 	void accept(Visitor v) {
@@ -375,9 +373,7 @@ class Sbreak extends Stmt {
 }
 
 class Scontinue extends Stmt {
-	public Swhile loop;
-	Scontinue(Swhile loop) {
-		this.loop = loop;
+	Scontinue() {
 	}
 
 	void accept(Visitor v) {
@@ -428,6 +424,24 @@ class Swhile extends Stmt {
 		v.visit(this);
 	}
 
+}
+
+class Sfor extends Stmt {
+	public Expr pre;
+	public Expr cond;
+	public Expr post;
+	public Stmt body;
+
+	Sfor(Expr pre, Expr cond, Expr post, Stmt body) {
+		this.pre = pre;
+		this.cond = cond;
+		this.post = post;
+		this.body = body;
+	}
+
+	void accept(Visitor v) {
+		v.visit(this);
+	}
 }
 
 class Sblock extends Stmt {
@@ -525,4 +539,5 @@ interface Visitor {
 	public void visit(Sreturn n);
 	public void visit(Decl_fun n);
 	public void visit(File n);
+	public void visit(Sfor n);
 }

@@ -4,7 +4,7 @@ import java.util.*;
 terminal String IDENT;
 terminal Integer INTEGER;
 terminal Binop CMP;
-terminal  INT, STRUCT, IF, ELSE, WHILE, RETURN, SIZEOF,
+terminal  INT, STRUCT, IF, ELSE, WHILE, FOR, RETURN, SIZEOF,
 	     LP, RP, LBRA,RBRA, COMMA, EQUAL, BARBAR, AMPAMP, EQ, NEQ,
 		  PLUS, MINUS, TIMES, DIV, ARROW, NOT, SEMICOLON, BREAK, CONTINUE;
 terminal UMINUS;
@@ -105,6 +105,8 @@ stmt ::=
     {: RESULT =  new Peval(e); :}
 | WHILE:loc LP expr:c RP stmt:s1
     {: RESULT =  new Pwhile(c, s1, new Loc(locleft, locright)); :}
+| FOR:loc LP expr:pre SEMICOLON expr:cond SEMICOLON expr:post RP stmt:body
+    {: RESULT =  new Pfor(pre, cond, post, body, new Loc(locleft, locright)); :}
 | bloc:b
     {: RESULT = b; :}
 ;

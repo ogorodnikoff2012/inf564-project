@@ -259,13 +259,13 @@ public class ToRTL implements Visitor {
   @Override
   public void visit(Sbreak sbreak) {
     LoopDescriptor loopDescriptor = loopStack.peek();
-    this.exitPoint = this.rtlFun.body.add(new Rgoto(loopDescriptor.exitPoint));
+    this.exitPoint = this.rtlFun.body.add(new Rgoto(loopDescriptor.breakLabel));
   }
 
   @Override
   public void visit(Scontinue scontinue) {
     LoopDescriptor loopDescriptor = loopStack.peek();
-    this.exitPoint = this.rtlFun.body.add(new Rgoto(loopDescriptor.gotoHead));
+    this.exitPoint = this.rtlFun.body.add(new Rgoto(loopDescriptor.continueLabel));
   }
 
   @Override
@@ -383,6 +383,35 @@ public class ToRTL implements Visitor {
       this.rtlFun = null;
     }
   }
+
+  @Override
+  public void visit(Sfor sfor) {
+    Label exitPoint = this.exitPoint;
+
+    Label gotoHead = this.rtlFun.body.add(null); // To be filled later
+    this.exitPoint = gotoHead;
+
+    exprValueStack.push(new Register()); // We don't need this value
+    sfor.post.accept(this);
+
+    Label continueLabel = this.exitPoint;
+
+    this.loopStack.push(new LoopDescriptor(continueLabel, exitPoint));
+    sfor.body.accept(this);
+    Label bodyBegin = this.exitPoint;
+
+    Register val = new Register();
+    exprValueStack.push(val);
+    this.exitPoint = this.rtlFun.body.add(new Rmubranch(new Mjz(), val, exitPoint, bodyBegin));
+    sfor.cond.accept(this);
+
+    this.rtlFun.body.replace(gotoHead, new Rgoto(this.exitPoint));
+
+    exprValueStack.push(new Register());
+    sfor.pre.accept(this);
+
+    this.loopStack.pop();
+  }
 }
 
 class ScopeStack {
@@ -413,11 +442,11 @@ class ScopeStack {
 }
 
 class LoopDescriptor {
-  public final Label gotoHead;
-  public final Label exitPoint;
+  public final Label continueLabel;
+  public final Label breakLabel;
 
-  public LoopDescriptor(Label gotoHead, Label exitPoint) {
-    this.gotoHead = gotoHead;
-    this.exitPoint = exitPoint;
+  public LoopDescriptor(Label continueLabel, Label breakLabel) {
+    this.continueLabel = continueLabel;
+    this.breakLabel = breakLabel;
   }
 }

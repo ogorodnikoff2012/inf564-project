@@ -13,7 +13,7 @@ public class Typing implements Pvisitor {
   private Sblock lastBlock = null;
   private Stmt stmt = null;
   private Expr expr = null;
-  private Swhile loop = null;
+  private int loopCount = 0;
 
   private final HashMap<String, Structure> declaredStructures = new HashMap<>();
 
@@ -42,6 +42,31 @@ public class Typing implements Pvisitor {
     }
 
     resolveFunction(new Pstring("main", Loc.nullLoc));
+  }
+
+  @Override
+  public void visit(Pfor n) throws SyntaxError, TypeError {
+    Expr old_expr = this.expr;
+
+    n.pre.accept(this);
+    Expr pre = this.expr;
+
+    n.cond.accept(this);
+    Expr cond = this.expr;
+
+    n.post.accept(this);
+    Expr post = this.expr;
+
+    this.expr = old_expr;
+
+    ++loopCount;
+
+    n.body.accept(this);
+    Stmt body = this.stmt;
+
+    this.stmt = new Sfor(pre, cond, post, body);
+
+    --loopCount;
   }
 
   private void addPredefinedFunctions() throws SyntaxError, TypeError {
@@ -211,20 +236,20 @@ public class Typing implements Pvisitor {
 
   @Override
   public void visit(Pbreak n) throws SyntaxError {
-    if (this.loop == null) {
+    if (this.loopCount == 0) {
       throw new SyntaxError("break not in a loop", n.loc);
     }
 
-    this.stmt = new Sbreak(this.loop);
+    this.stmt = new Sbreak();
   }
 
   @Override
   public void visit(Pcontinue n) throws SyntaxError {
-    if (this.loop == null) {
+    if (this.loopCount == 0) {
       throw new SyntaxError("continue not in a loop", n.loc);
     }
 
-    this.stmt = new Scontinue(this.loop);
+    this.stmt = new Scontinue();
   }
 
   @Override
@@ -262,16 +287,13 @@ public class Typing implements Pvisitor {
     Expr e = this.expr;
     this.expr = old_expr;
 
-    Swhile old_loop = this.loop;
-    this.loop = new Swhile(e, null);
-
+    ++this.loopCount;
 
     n.s1.accept(this);
     Stmt s = this.stmt;
 
-    this.loop.s = s;
-    this.stmt = this.loop;
-    this.loop = old_loop;
+    this.stmt = new Swhile(e, s);
+    --this.loopCount;
   }
 
   private void collect_stmt(LinkedList<Pstmt> pstmt_list, LinkedList<Stmt> result)

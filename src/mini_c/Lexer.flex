@@ -145,6 +145,9 @@ hexa               = [:digit:] | [abcdefABCDEF]
     "while"
     { return symbol(WHILE); }
 
+    "for"
+    { return symbol(FOR); }
+
     "return"
     { return symbol(RETURN); }
 

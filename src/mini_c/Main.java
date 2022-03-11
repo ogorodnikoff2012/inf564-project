@@ -52,12 +52,18 @@ public class Main {
         if (!arg.endsWith(".c")) usage();
         file = arg;
       }
-    if (file == null) usage ();
+    if (file == null) usage();
 
     java.io.Reader reader = new java.io.FileReader(file);
     Lexer lexer = new Lexer(reader);
     MyParser parser = new MyParser(lexer);
-    Pfile f = (Pfile) parser.parse().value;
+    Pfile f = null;
+    try {
+      f = (Pfile) parser.parse().value;
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+      System.exit(1);
+    }
     if (parse_only) System.exit(0);
     Typing typer = new Typing();
     try {

@@ -20,7 +20,7 @@ public class MyParser extends Parser {
 		if (info instanceof Symbol) {
 			Symbol symbol = (Symbol) info;
 			message += String.format(" at line %d, column %d (%s)\n",
-					symbol.left, symbol.right, showSymbol(symbol.sym));
+					symbol.left + 1, symbol.right + 1, showSymbol(symbol.sym));
 		}
 		throw new Exception(message);
 	}

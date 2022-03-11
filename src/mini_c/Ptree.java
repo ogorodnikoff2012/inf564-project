@@ -380,6 +380,25 @@ class Pwhile extends Pstmt {
 	}
 }
 
+class Pfor extends Pstmt {
+	Pexpr pre;
+	Pexpr cond;
+	Pexpr post;
+	Pstmt body;
+
+	public Pfor(Pexpr pre, Pexpr cond, Pexpr post, Pstmt body, Loc loc) {
+		super(loc);
+		this.pre = pre;
+		this.cond = cond;
+		this.post = post;
+		this.body = body;
+	}
+
+	void accept(Pvisitor v) throws SyntaxError, TypeError {
+		v.visit(this);
+	}
+}
+
 interface Pvisitor {
 
 	public void visit(PTint n);
@@ -427,4 +446,6 @@ interface Pvisitor {
 	public void visit(Pfun n) throws SyntaxError, TypeError;
 
 	public void visit(Pfile n) throws SyntaxError, TypeError;
+
+	public void visit(Pfor n) throws SyntaxError, TypeError;
 }
