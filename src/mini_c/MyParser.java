@@ -13,16 +13,20 @@ public class MyParser extends Parser {
 	}
 
 	public void report_fatal_error(String message, Object info)
-			throws Exception {
+			throws LexicalError {
 		// Override this method to be silent and throw an exception that
 		// contains the error message.
 		message = "Syntax error"; // discard message produced by CUP
+		int line = -1;
+		int col = -1;
 		if (info instanceof Symbol) {
 			Symbol symbol = (Symbol) info;
+			line = symbol.left;
+			col = symbol.right;
 			message += String.format(" at line %d, column %d (%s)\n",
 					symbol.left + 1, symbol.right + 1, showSymbol(symbol.sym));
 		}
-		throw new Exception(message);
+		throw new LexicalError(message, new Loc(line, col));
 	}
 
 	String showSymbol(int token) {

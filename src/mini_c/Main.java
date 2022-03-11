@@ -23,7 +23,9 @@ public class Main {
         .append(filename)
         .append("\", line ")
         .append(location.line + 1)
-        .append(", column ")
+        .append(", characters ")
+        .append(location.column + 1)
+        .append('-')
         .append(location.column + 1)
         .append(":\n")
         .append(err.getMessage());
@@ -57,8 +59,8 @@ public class Main {
     Pfile f = null;
     try {
       f = (Pfile) parser.parse().value;
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
+    } catch (CompilerError err) {
+      printCompilerError(file, err);
       System.exit(1);
     }
     if (parse_only) System.exit(0);
