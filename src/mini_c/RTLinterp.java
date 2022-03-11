@@ -103,6 +103,7 @@ public class RTLinterp implements RTLVisitor {
       case Msub: set(o.r2, v2 - v1); break;
       case Mmul: set(o.r2, v2 * v1); break;
       case Mdiv: set(o.r2, v2 / v1); break;
+      case Mmod: set(o.r2, v2 % v1); break;
       case Msete: set(o.r2, v2 == v1); break;
       case Msetne: set(o.r2, v2 != v1); break;
       case Msetl: set(o.r2, v2 < v1); break;

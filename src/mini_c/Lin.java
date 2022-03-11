@@ -208,6 +208,11 @@ public class Lin implements LTLVisitor {
         asm.cqto();
         asm.idivq(lhs);
         break;
+      case Mmod:
+        asm.movq(Register.rdx.name, Register.rax.name);
+        asm.cqto();
+        asm.idivq(lhs);
+        break;
       case Msete:
         assert Register.rax.name.equals(rhs);
         asm.cmpq(lhs, rhs);

@@ -92,14 +92,21 @@ class ERmbinop extends ERTL {
   void accept(ERTLVisitor v) { v.visit(this); }
   public String toString() { return m + " " + r1 + " " + r2 + " --> " + l; }
   Label[] succ() { return new Label[] { l }; }
+
   @Override Set<Register> def() { 
     if (m == Mbinop.Mdiv) {
       assert (r2.equals(Register.rax));
       return pair(Register.rax, Register.rdx);
-    } else
-      return singleton(r2); }
+    } else if (m == Mbinop.Mmod) {
+      assert (r2.equals(Register.rdx));
+      return pair(Register.rax, Register.rdx);
+    } else {
+      return singleton(r2);
+    }
+  }
+
   @Override Set<Register> use() {
-    if (m == Mbinop.Mdiv) return triple(Register.rax, Register.rdx, r1);
+    if (m == Mbinop.Mdiv || m == Mbinop.Mmod) return triple(Register.rax, Register.rdx, r1);
     else if (m == Mbinop.Mmov) return singleton(r1);
     else return pair(r1, r2); }
 }

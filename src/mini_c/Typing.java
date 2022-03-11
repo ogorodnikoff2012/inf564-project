@@ -468,6 +468,7 @@ public class Typing implements Pvisitor {
       case Bsub:
       case Bmul:
       case Bdiv:
+      case Bmod:
         if (Tint.tint.equals(lhs) && Tint.tint.equals(rhs)) {
           return Tint.tint;
         }

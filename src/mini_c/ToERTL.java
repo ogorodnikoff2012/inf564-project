@@ -46,25 +46,26 @@ public class ToERTL implements RTLVisitor {
     this.ertl = new ERmbinop(Mbinop.Mmov, rmunop.r, Register.rax, l1);
   }
 
-  private static final HashSet<Mbinop> kBinopsRequireRax = new HashSet<>();
+  private static final HashMap<Mbinop, Register> kBinopsRequireReg = new HashMap<>();
   static {
-    kBinopsRequireRax.add(Mbinop.Mdiv);
-    kBinopsRequireRax.add(Mbinop.Msete);
-    kBinopsRequireRax.add(Mbinop.Msetne);
-    kBinopsRequireRax.add(Mbinop.Msetl);
-    kBinopsRequireRax.add(Mbinop.Msetle);
-    kBinopsRequireRax.add(Mbinop.Msetg);
-    kBinopsRequireRax.add(Mbinop.Msetge);
+    kBinopsRequireReg.put(Mbinop.Mdiv, Register.rax);
+    kBinopsRequireReg.put(Mbinop.Mmod, Register.rdx);
+    kBinopsRequireReg.put(Mbinop.Msete, Register.rax);
+    kBinopsRequireReg.put(Mbinop.Msetne, Register.rax);
+    kBinopsRequireReg.put(Mbinop.Msetl, Register.rax);
+    kBinopsRequireReg.put(Mbinop.Msetle, Register.rax);
+    kBinopsRequireReg.put(Mbinop.Msetg, Register.rax);
+    kBinopsRequireReg.put(Mbinop.Msetge, Register.rax);
   }
 
   @Override
   public void visit(Rmbinop rmbinop) {
     assert this.ertl == null;
-    if (kBinopsRequireRax.contains(rmbinop.m)) {
-      Label movResult = this.ertlFun.body.add(new ERmbinop(Mbinop.Mmov, Register.rax, rmbinop.r2,
-          rmbinop.l));
-      Label div = this.ertlFun.body.add(new ERmbinop(rmbinop.m, rmbinop.r1, Register.rax, movResult));
-      this.ertl = new ERmbinop(Mbinop.Mmov, rmbinop.r2, Register.rax, div);
+    if (kBinopsRequireReg.containsKey(rmbinop.m)) {
+      Register reg = kBinopsRequireReg.get(rmbinop.m);
+      Label movResult = this.ertlFun.body.add(new ERmbinop(Mbinop.Mmov, reg, rmbinop.r2, rmbinop.l));
+      Label op = this.ertlFun.body.add(new ERmbinop(rmbinop.m, rmbinop.r1, reg, movResult));
+      this.ertl = new ERmbinop(Mbinop.Mmov, rmbinop.r2, reg, op);
     } else {
       this.ertl = new ERmbinop(rmbinop.m, rmbinop.r1, rmbinop.r2, rmbinop.l);
     }

@@ -103,6 +103,9 @@ hexa               = [:digit:] | [abcdefABCDEF]
     "/"
     { return symbol(DIV); }
 
+    "%"
+    { return symbol(MOD); }
+
     "<"
     { return symbol(CMP, Binop.Blt); }
 

@@ -6,7 +6,7 @@ terminal Integer INTEGER;
 terminal Binop CMP;
 terminal  INT, STRUCT, IF, ELSE, WHILE, FOR, RETURN, SIZEOF,
 	     LP, RP, LBRA,RBRA, COMMA, EQUAL, BARBAR, AMPAMP, EQ, NEQ,
-		  PLUS, MINUS, TIMES, DIV, ARROW, NOT, SEMICOLON, BREAK, CONTINUE;
+		  PLUS, MINUS, TIMES, DIV, MOD, ARROW, NOT, SEMICOLON, BREAK, CONTINUE;
 terminal UMINUS;
 
 non terminal Pfile file;
@@ -31,7 +31,7 @@ precedence left AMPAMP;
 precedence left EQ, NEQ;
 precedence left CMP;
 precedence left PLUS, MINUS;
-precedence left TIMES, DIV;
+precedence left TIMES, DIV, MOD;
 precedence nonassoc NOT, UMINUS;
 precedence left ARROW;
 
@@ -142,6 +142,8 @@ expr ::=
     {: RESULT = new Pbinop(Binop.Bmul, e1, e2); :}
 | expr:e1 DIV expr:e2
     {: RESULT = new Pbinop(Binop.Bdiv, e1, e2); :}
+| expr:e1 MOD expr:e2
+    {: RESULT = new Pbinop(Binop.Bmod, e1, e2); :}
 | expr:e1 CMP:c expr:e2
     {: RESULT = new Pbinop(c, e1, e2); :}
 | expr:e1 AMPAMP expr:e2

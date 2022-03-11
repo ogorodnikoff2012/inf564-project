@@ -109,6 +109,9 @@ public class LTLinterp  implements LTLVisitor {
       case Mdiv:
         if (!o.o2.equals(new Reg(Register.rax))) throw new Error("div: r2 must be %rax");
         set(o.o2, v2 / v1); break;
+      case Mmod:
+        if (!o.o2.equals(new Reg(Register.rdx))) throw new Error("mod: r2 must be %rdx");
+        set(o.o2, v2 % v1); break;
       case Msete: set(o.o2, v2 == v1); break;
       case Msetne: set(o.o2, v2 != v1); break;
       case Msetl: set(o.o2, v2 < v1); break;

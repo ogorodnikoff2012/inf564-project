@@ -93,6 +93,9 @@ public class ERTLinterp implements ERTLVisitor {
       case Mdiv:
         if (!o.r2.equals(Register.rax)) throw new Error("div: r2 must be %rax");
         set(o.r2, v2 / v1); break;
+      case Mmod:
+        if (!o.r2.equals(Register.rdx)) throw new Error("mod: r2 must be %rdx");
+        set(o.r2, v2 % v1); break;
       case Msete: set(o.r2, v2 == v1); break;
       case Msetne: set(o.r2, v2 != v1); break;
       case Msetl: set(o.r2, v2 < v1); break;

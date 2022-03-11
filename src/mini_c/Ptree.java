@@ -5,7 +5,7 @@ import java.util.LinkedList;
 enum Binop {
 	Beq, Bneq,
 	Blt, Ble, Bgt, Bge,
-	Badd, Bsub, Bmul, Bdiv,
+	Badd, Bsub, Bmul, Bdiv, Bmod,
 	Band, Bor
 }
 

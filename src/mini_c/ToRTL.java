@@ -220,6 +220,9 @@ public class ToRTL implements Visitor {
       case Bdiv:
         opCode = Mbinop.Mdiv;
         break;
+      case Bmod:
+        opCode = Mbinop.Mmod;
+        break;
       default:
         throw new Error("Not implemented yet: " + ebinop.b);
     }
